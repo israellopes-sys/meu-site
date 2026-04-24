@@ -1,0 +1,28 @@
+### LISTAR USUÁRIOS
+GET http://localhost:3000/usuarios
+
+
+### CRIAR USUÁRIO
+POST http://localhost:3000/usuarios
+Content-Type: application/json
+
+{
+  "nome": "Israel",
+  "email": "teste@email.com",
+  "senha": "123"
+}
+
+
+### EDITAR USUÁRIO
+PUT http://localhost:3000/usuarios/2
+Content-Type: application/json
+
+{
+  "nome": "Atualizado",
+  "email": "novo@email.com",
+  "senha": "456"
+}
+
+
+### DELETAR USUÁRIO
+DELETE http://localhost:3000/usuarios/2
