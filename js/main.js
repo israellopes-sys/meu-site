@@ -1,3 +1,4 @@
+
 const form = document.getElementById('formCadastro');
 
 if (form) {
