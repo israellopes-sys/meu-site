@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player MPB</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="player-card">
+    <div class="back-nav" onclick="window.location.href='index.html'">
+        <i class="fa-solid fa-arrow-left"></i> Sair
+    </div>
+
+    <div class="album-art">
+        <i class="fa-solid fa-compact-disc fa-spin fa-4x"></i>
+    </div>
+
+    <div class="song-info">
+        <div class="song-title">Águas de Março</div>
+        <div class="artist-name">Elis Regina & Tom Jobim</div>
+    </div>
+
+    <div class="controls">
+        <button onclick="togglePlay()" class="btn-play">
+            <i class="fa-solid fa-play" id="playIcon"></i>
+        </button>
+    </div>
+
+    <div class="action-buttons">
+        <button onclick="toggleLike(this)" class="pill-btn">
+            <i class="fa-solid fa-heart"></i> Curtir
+        </button>
+
+        <button onclick="window.location.href='tela3.html'" class="pill-btn">
+            <i class="fa-solid fa-comment"></i> Comentários
+        </button>
+    </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>

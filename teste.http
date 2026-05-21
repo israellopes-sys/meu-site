@@ -1,0 +1,55 @@
+### LISTAR USUÁRIOS
+GET http://localhost:3000/usuarios
+
+###
+
+### CADASTRAR USUÁRIO
+POST http://localhost:3000/usuarios
+Content-Type: application/json
+
+{
+    "nome": "Carlos",
+    "email": "carloss@email.com",
+    "senha": "123456"
+}
+
+###
+
+### TESTE DE EMAIL DUPLICADO
+POST http://localhost:3000/usuarios
+Content-Type: application/json
+
+{
+    "nome": "Carlos",
+    "email": "carloss@email.com",
+    "senha": "123456"
+}
+
+###
+
+### TESTE DE CAMPO VAZIO
+POST http://localhost:3000/usuarios
+Content-Type: application/json
+
+{
+    "nome": "",
+    "email": "",
+    "senha": ""
+}
+
+###
+
+### ATUALIZAR USUÁRIO
+PUT http://localhost:3000/usuarios/1
+Content-Type: application/json
+
+{
+    "nome": "Israell Atualizado",
+    "email": "novo@email.com",
+    "senha": "123"
+}
+
+###
+
+### REMOVER USUÁRIO
+DELETE http://localhost:3000/usuarios/28
