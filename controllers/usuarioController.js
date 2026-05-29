@@ -12,11 +12,11 @@ const usuarioController = {
             });
         }
 
-        Usuario.criar(nome, email, senha, (err, result) => {
+        Usuario.criar(nome, email, senha, function (err) {
 
             if (err) {
 
-                if (err.code === 'ER_DUP_ENTRY') {
+                if (err.message.includes('UNIQUE')) {
                     return res.status(400).json({
                         erro: 'Email já cadastrado'
                     });
@@ -28,7 +28,7 @@ const usuarioController = {
             }
 
             res.status(201).json({
-                id: result.insertId,
+                id: this.lastID,
                 nome,
                 email
             });
@@ -54,7 +54,7 @@ const usuarioController = {
         const id = req.params.id;
         const { nome, email, senha } = req.body;
 
-        Usuario.atualizar(id, nome, email, senha, (err, result) => {
+        Usuario.atualizar(id, nome, email, senha, function (err) {
 
             if (err) {
                 return res.status(500).json({
@@ -62,7 +62,7 @@ const usuarioController = {
                 });
             }
 
-            if (result.affectedRows === 0) {
+            if (this.changes === 0) {
                 return res.status(404).json({
                     erro: 'Usuário não encontrado'
                 });
@@ -78,7 +78,7 @@ const usuarioController = {
 
         const id = req.params.id;
 
-        Usuario.remover(id, (err, result) => {
+        Usuario.remover(id, function (err) {
 
             if (err) {
                 return res.status(500).json({
@@ -86,7 +86,7 @@ const usuarioController = {
                 });
             }
 
-            if (result.affectedRows === 0) {
+            if (this.changes === 0) {
                 return res.status(404).json({
                     erro: 'Usuário não encontrado'
                 });

@@ -1,5 +1,3 @@
-USE mpb_app;
-
 INSERT INTO Usuario (nome, email, senha)
 VALUES
 ('Israel', 'israel@email.com', '123456'),

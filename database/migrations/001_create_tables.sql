@@ -1,28 +1,24 @@
-CREATE DATABASE IF NOT EXISTS mpb_app;
-
-USE mpb_app;
-
 CREATE TABLE IF NOT EXISTS Usuario (
-    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    senha VARCHAR(255) NOT NULL
+    id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    senha TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Musica (
-    id_musica INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(100) NOT NULL,
-    artista VARCHAR(100) NOT NULL,
-    capa VARCHAR(255),
-    arquivo_audio VARCHAR(255)
+    id_musica INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    artista TEXT NOT NULL,
+    capa TEXT,
+    arquivo_audio TEXT
 );
 
 CREATE TABLE IF NOT EXISTS Comentario (
-    id_comentario INT AUTO_INCREMENT PRIMARY KEY,
+    id_comentario INTEGER PRIMARY KEY AUTOINCREMENT,
     texto TEXT NOT NULL,
-    data_comentario DATETIME NOT NULL,
-    id_usuario INT NOT NULL,
-    id_musica INT NOT NULL,
+    data_comentario TEXT NOT NULL,
+    id_usuario INTEGER NOT NULL,
+    id_musica INTEGER NOT NULL,
 
     FOREIGN KEY (id_usuario)
     REFERENCES Usuario(id_usuario),
@@ -32,8 +28,8 @@ CREATE TABLE IF NOT EXISTS Comentario (
 );
 
 CREATE TABLE IF NOT EXISTS Curtida (
-    id_usuario INT,
-    id_musica INT,
+    id_usuario INTEGER,
+    id_musica INTEGER,
 
     PRIMARY KEY (id_usuario, id_musica),
 
@@ -45,7 +41,7 @@ CREATE TABLE IF NOT EXISTS Curtida (
 );
 
 CREATE TABLE IF NOT EXISTS Topico (
-    id_topico INT AUTO_INCREMENT PRIMARY KEY,
-    titulo VARCHAR(100) NOT NULL,
+    id_topico INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
     descricao TEXT NOT NULL
 );

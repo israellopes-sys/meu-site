@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require('../database/db');
 
 const Usuario = {
 
@@ -9,14 +9,14 @@ const Usuario = {
             VALUES (?, ?, ?)
         `;
 
-        db.query(sql, [nome, email, senha], callback);
+        db.run(sql, [nome, email, senha], callback);
     },
 
     listar: (callback) => {
 
         const sql = 'SELECT * FROM Usuario';
 
-        db.query(sql, callback);
+        db.all(sql, [], callback);
     },
 
     atualizar: (id, nome, email, senha, callback) => {
@@ -27,7 +27,7 @@ const Usuario = {
             WHERE id_usuario = ?
         `;
 
-        db.query(sql, [nome, email, senha, id], callback);
+        db.run(sql, [nome, email, senha, id], callback);
     },
 
     remover: (id, callback) => {
@@ -37,7 +37,7 @@ const Usuario = {
             WHERE id_usuario = ?
         `;
 
-        db.query(sql, [id], callback);
+        db.run(sql, [id], callback);
     }
 };
 

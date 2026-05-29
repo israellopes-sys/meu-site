@@ -8,8 +8,8 @@ POST http://localhost:3000/usuarios
 Content-Type: application/json
 
 {
-    "nome": "Carlos",
-    "email": "carloss@email.com",
+    "nome": "teste",
+    "email": "teste@gmail.com",
     "senha": "123456"
 }
 
@@ -52,4 +52,4 @@ Content-Type: application/json
 ###
 
 ### REMOVER USUÁRIO
-DELETE http://localhost:3000/usuarios/28
+DELETE http://localhost:3000/usuarios/1
