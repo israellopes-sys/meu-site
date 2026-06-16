@@ -15,5 +15,5 @@ app.use(morgan('dev'));
 app.use(usuarioRoutes);
 
 app.listen(3000, () => {
-    console.log('OLÁ, BB, vamos aprontar...😈 🚀');
+    console.log('Servidor rodando na porta 3000🚀');
 });
