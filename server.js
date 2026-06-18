@@ -8,6 +8,8 @@ const usuarioRoutes = require('./routes/usuarioRoutes');
 
 const app = express();
 
+const comentarioRoutes = require('./routes/comentarioRoutes');
+
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -21,3 +23,5 @@ app.listen(3000, () => {
 const musicaRoutes = require('./routes/musicaRoutes');
 
 app.use(musicaRoutes);
+
+app.use(comentarioRoutes);

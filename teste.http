@@ -1,17 +1,17 @@
 ### LISTAR USUÁRIOS
 GET http://localhost:3000/usuarios
 
-
-
-
-
 ###
 GET http://localhost:3000/musicas/1
 
 
 ### Listar Músicas
 GET http://localhost:3000/musicas
+
 ###
+GET http://localhost:3000/comentarios/1
+###
+GET http://localhost:3000/comentarios
 
 ### CADASTRAR USUÁRIO
 POST http://localhost:3000/usuarios
@@ -25,14 +25,13 @@ Content-Type: application/json
 
 ###
 
-### TESTE DE EMAIL DUPLICADO
-POST http://localhost:3000/usuarios
+POST http://localhost:3000/comentarios
 Content-Type: application/json
 
 {
-    "nome": "teste2",
-    "email": "teste2@email.com",
-    "senha": "123456"
+    "texto": "Comentário criado pelo teste.http",
+    "id_usuario": 1,
+    "id_musica": 1
 }
 
 ###

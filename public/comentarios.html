@@ -10,30 +10,113 @@
 <body>
 
 <div class="container">
+
     <div class="header">
-    <div class="btn-group">
-        <a href="tela2.html" class="btn-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Voltar
-        </a>
-        <h1>Tópicos de Discussão</h1>
+        <div class="btn-group">
+            <a href="javascript:history.back()" class="btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Voltar
+            </a>
+            <h1>Tópicos de Discussão</h1>
+        </div>
+
+        <button class="btn-primary" onclick="alert('Funcionalidade em desenvolvimento!')">
+            + Novo Tópico
+        </button>
     </div>
 
-    <button class="btn-primary" onclick="alert('Funcionalidade em desenvolvimento!')">
-        + Novo Tópico
+    <h2>Comentários</h2>
+
+    <div id="lista-comentarios"></div>
+
+    <textarea id="novoComentario" placeholder="Digite seu comentário"></textarea>
+
+    <button class="btn-primary" onclick="enviarComentario()">
+        Enviar Comentário
     </button>
-</div>
-    <h1>Tópicos</h1>
 
-    <div class="topic-card">
-        <h3>Águas de Março</h3>
-        <p>Discussão sobre a música</p>
-    </div>
-
-    <div class="topic-card">
-        <h3>Marisa Monte</h3>
-        <p>Novo lançamento</p>
-    </div>
 </div>
+
+<h2>Comentários</h2>
+
+<textarea
+    id="novoComentario"
+    placeholder="Digite seu comentário">
+</textarea>
+
+<br><br>
+<button class="btn-primary" onclick="enviarComentario()">
+    Enviar Comentário
+</button>
+
+<br><br>
+
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const idMusica = params.get('id');
+
+fetch(`http://localhost:3000/comentarios/${idMusica}`)
+    .then(res => res.json())
+    .then(comentarios => {
+
+        const lista = document.getElementById('lista-comentarios');
+
+        comentarios.forEach(comentario => {
+
+            lista.innerHTML += `
+                <div class="topic-card">
+                    <p>${comentario.texto}</p>
+                    <small>${comentario.data_comentario}</small>
+                </div>
+            `;
+
+        });
+
+    })
+    .catch(err => {
+        console.error(err);
+    });
+
+function enviarComentario() {
+
+    const texto =
+        document.getElementById('novoComentario').value;
+
+    fetch('http://localhost:3000/comentarios', {
+
+        method: 'POST',
+
+        headers: {
+            'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+
+            texto: texto,
+            id_usuario: 1,
+            id_musica: idMusica
+
+        })
+    })
+
+    .then(res => res.json())
+
+    .then(data => {
+
+        alert('Comentário enviado!');
+
+        location.reload();
+
+    })
+
+    .catch(err => {
+
+        console.error(err);
+
+    });
+}
+</script>
 
 </body>
 </html>

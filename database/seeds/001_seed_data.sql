@@ -12,3 +12,10 @@ INSERT INTO Topico (titulo, descricao)
 VALUES
 ('MPB Clássica', 'Discussões sobre músicas clássicas'),
 ('Favoritas', 'Compartilhe suas músicas favoritas');
+
+INSERT INTO Comentario
+(texto, data_comentario, id_usuario, id_musica)
+VALUES
+('Essa música é incrível!', '2026-06-18', 1, 1),
+('Uma das melhores da MPB.', '2026-06-18', 2, 1),
+('Gosto muito dessa interpretação.', '2026-06-18', 1, 2);
