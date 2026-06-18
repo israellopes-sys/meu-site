@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Músicas</title>
+</head>
+<body>
+
+    <h1>Músicas MPB</h1>
+
+    <div id="lista-musicas"></div>
+
+    <script>
+    fetch('http://localhost:3000/musicas')
+        .then(res => res.json())
+        .then(musicas => {
+
+            const lista = document.getElementById('lista-musicas');
+
+            musicas.forEach(musica => {
+
+                lista.innerHTML += `
+                    <div>
+                        <a href="musica.html?id=${musica.id_musica}">
+                            🎵 ${musica.titulo} - ${musica.artista}
+                        </a>
+                    </div>
+                    <br>
+                `;
+            });
+
+        })
+        .catch(err => {
+            console.error(err);
+        });
+    </script>
+
+</body>
+</html>

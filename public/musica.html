@@ -10,7 +10,7 @@
 <body>
 
 <div class="player-card">
-    <div class="back-nav" onclick="window.location.href='index.html'">
+    <div class="back-nav" onclick="window.location.href='home.html'">
         <i class="fa-solid fa-arrow-left"></i> Sair
     </div>
 
@@ -18,10 +18,9 @@
         <i class="fa-solid fa-compact-disc fa-spin fa-4x"></i>
     </div>
 
-    <div class="song-info">
-        <div class="song-title">Águas de Março</div>
-        <div class="artist-name">Elis Regina & Tom Jobim</div>
-    </div>
+    <div class="song-title" id="titulo"></div>
+
+    <div class="artist-name" id="artista"></div>
 
     <div class="controls">
         <button onclick="togglePlay()" class="btn-play">
@@ -34,11 +33,30 @@
             <i class="fa-solid fa-heart"></i> Curtir
         </button>
 
-        <button onclick="window.location.href='tela3.html'" class="pill-btn">
+       <button onclick="window.location.href='comentarios.html?id=' + window.idMusica" class="pill-btn">
             <i class="fa-solid fa-comment"></i> Comentários
         </button>
     </div>
 </div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+window.idMusica = params.get('id');
+
+fetch(`http://localhost:3000/musicas/${window.idMusica}`)
+    .then(res => res.json())
+    .then(musica => {
+
+        document.getElementById('titulo').textContent = musica.titulo;
+        document.getElementById('artista').textContent = musica.artista;
+
+    })
+    .catch(err => {
+        console.error(err);
+    });
+
+</script>
 
 <script src="js/script.js"></script>
 </body>
