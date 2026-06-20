@@ -19,6 +19,17 @@ const Usuario = {
         db.all(sql, [], callback);
     },
 
+    buscarPorEmail: (email, callback) => {
+
+        const sql = `
+            SELECT *
+            FROM Usuario
+            WHERE email = ?
+        `;
+
+        db.get(sql, [email], callback);
+    },
+
     atualizar: (id, nome, email, senha, callback) => {
 
         const sql = `
@@ -39,6 +50,7 @@ const Usuario = {
 
         db.run(sql, [id], callback);
     }
+    
 };
 
 module.exports = Usuario;

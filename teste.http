@@ -62,3 +62,13 @@ Content-Type: application/json
 
 ### REMOVER USUÁRIO
 DELETE http://localhost:3000/usuarios/1
+
+
+###
+POST http://localhost:3000/login
+Content-Type: application/json
+
+{
+    "email": "israel@email.com",
+    "senha": "123456"
+}

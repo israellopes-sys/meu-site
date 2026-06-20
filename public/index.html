@@ -34,9 +34,20 @@
                 </div>
 
                  <div class="mb-6">
-                     <label>Senha</label>
-                     <input id="senha" type="password" class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
-                 </div>
+                    <label>Senha</label>
+
+                    <input
+                        id="senha"
+                        type="password"
+                        minlength="6"
+                        required
+                        class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
+
+                    <div class="mt-2">
+                        <input type="checkbox" id="mostrarSenha">
+                        <label for="mostrarSenha">Mostrar senha</label>
+                    </div>
+                </div>
 
                  <button type="submit"
                      class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg">
@@ -56,6 +67,74 @@
 
     <!-- SCRIPT -->
     <script src="js/main.js"></script>
+
+    <script>
+
+
+    const campoSenha =
+        document.getElementById('senha');
+    
+
+    const checkbox =
+        document.getElementById('mostrarSenha');
+
+    checkbox.addEventListener('change', () => {
+
+        if (checkbox.checked) {
+
+            campoSenha.type = 'text';
+
+        } else {
+
+            campoSenha.type = 'password';
+
+        }
+
+    });
+    const formCadastroPage = document.getElementById('formCadastro'); // Certifique-se de que seu <form> tem esse id="formCadastro"
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault(); // Impede a página de atualizar sozinha
+
+        // 1. Pega os valores que o usuário digitou
+        const nome = document.getElementById('nome').value;
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+
+        if (senha.length < 6) {
+
+            alert('A senha deve possuir pelo menos 6 caracteres.');
+
+            return;
+
+        }
+
+        // 2. Envia os dados para o seu back-end (ajuste a URL se a sua rota for diferente)
+        fetch('http://localhost:3000/usuarios', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nome: nome,
+                email: email,
+                senha: senha
+            })
+        })
+        .then(res => {
+            if (res.ok) {
+                alert('Conta criada com sucesso! Faça seu login.');
+                window.location.href = 'login.html'; // 3. Redireciona para o login
+            } else {
+                alert('Erro ao criar conta. Verifique os dados ou tente outro e-mail.');
+            }
+        })
+        .catch(err => {
+            console.error('Erro na requisição:', err);
+            alert('Não foi possível conectar ao servidor.');
+        });
+    });
+    </script>
 
 </body>
 </html>

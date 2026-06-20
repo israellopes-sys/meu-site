@@ -3,32 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <title>Lista de Músicas</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <h1>Músicas MPB</h1>
+    <div class="container">
+        
+        <h1>Músicas <span class="text-highlight">MPB</span></h1>
 
-    <div id="lista-musicas"></div>
+        <p id="usuario-logado"></p>
+
+        <div id="lista-musicas" class="music-list"></div>
+
+        <button id="btnLogout" class="btn-secondary">
+            Sair
+        </button>
+
+    </div>
 
     <script>
+
+    const usuario =
+        JSON.parse(localStorage.getItem('usuarioLogado'));
+
+    if (usuario) {
+
+        document.getElementById('usuario-logado')
+            .textContent = `Olá, ${usuario.nome} 👋`;
+
+    }
+        JSON.parse(localStorage.getItem('usuarioLogado'));
+
+    if (!usuario) {
+
+        window.location.href = 'login.html';
+
+    }
+
+    document.getElementById('btnLogout')
+        .addEventListener('click', () => {
+
+            localStorage.removeItem('usuarioLogado');
+
+            window.location.href = 'login.html';
+
+    });
+
     fetch('http://localhost:3000/musicas')
         .then(res => res.json())
         .then(musicas => {
-
             const lista = document.getElementById('lista-musicas');
 
             musicas.forEach(musica => {
-
+                // Modificado: Agora injeta a estrutura de cards elegantes com hover
                 lista.innerHTML += `
-                    <div>
-                        <a href="musica.html?id=${musica.id_musica}">
-                            🎵 ${musica.titulo} - ${musica.artista}
-                        </a>
-                    </div>
-                    <br>
+                    <a href="musica.html?id=${musica.id_musica}" class="music-item">
+                        <div class="topic-card topic-blue">
+                            <h3>🎵 ${musica.titulo}</h3>
+                            <p class="music-artist">${musica.artista}</p>
+                        </div>
+                    </a>
                 `;
             });
-
         })
         .catch(err => {
             console.error(err);

@@ -201,3 +201,109 @@ textarea:focus {
     outline: none;
     border-color: var(--accent-blue);
 }
+
+
+/* ===== CENTRALIZADOR SEGURO PARA TELA DE LOGIN/CADASTRO ===== */
+.page-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100vw;
+    background-color: var(--bg-color); /* Garante que o fundo fique escuro */
+}
+
+/* ===== ESTILO DO CARD DE LOGIN ===== */
+.form-container {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px 30px;
+    width: 400px;
+    max-width: 90%;
+    box-sizing: border-box;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.form-container h2 {
+    color: var(--text-white);
+    text-align: center;
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+.text-highlight {
+    color: var(--accent-blue);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: var(--text-white);
+    font-size: 0.95rem;
+}
+
+/* Deixa os inputs escuros e elegantes */
+.form-group input {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text-white);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    border-color: var(--accent-blue);
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--text-gray);
+}
+
+.form-footer a {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+
+/* ===== ESTILO DA TELA DE MÚSICAS ===== */
+.music-item {
+    text-decoration: none; /* Remove o sublinhado do link */
+    color: inherit;        /* Faz o link herdar as cores do card */
+    display: block;        /* Garante que o card ocupe a linha toda */
+    margin-bottom: 15px;   /* Cria um espaçamento entre uma música e outra */
+}
+
+.music-artist {
+    color: var(--text-gray);
+    margin: 5px 0 0 0;
+    font-size: 0.95rem;
+}
+
+#usuario-logado {
+    text-align: center;
+    color: var(--text-gray);
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+}
+
+#btnLogout {
+    display: block;
+    margin: 30px auto 0 auto;
+}

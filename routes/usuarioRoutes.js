@@ -6,6 +6,8 @@ const usuarioController = require('../controllers/usuarioController');
 
 router.post('/usuarios', usuarioController.criarUsuario);
 
+router.post('/login', usuarioController.login);
+
 router.get('/usuarios', usuarioController.listarUsuarios);
 
 router.put('/usuarios/:id', usuarioController.atualizarUsuario);

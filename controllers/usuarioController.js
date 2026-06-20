@@ -35,6 +35,42 @@ const usuarioController = {
         });
     },
 
+    login: (req, res) => {
+
+        const { email, senha } = req.body;
+
+        Usuario.buscarPorEmail(email, (err, usuario) => {
+
+            if (err) {
+                return res.status(500).json({
+                    erro: 'Erro ao realizar login'
+                });
+            }
+
+            if (!usuario) {
+                return res.status(401).json({
+                    erro: 'Usuário não encontrado'
+                });
+            }
+
+            if (usuario.senha !== senha) {
+                return res.status(401).json({
+                    erro: 'Senha incorreta'
+                });
+            }
+
+            res.json({
+                mensagem: 'Login realizado com sucesso',
+                usuario: {
+                    id: usuario.id_usuario,
+                    nome: usuario.nome,
+                    email: usuario.email
+                }
+            });
+
+        });
+    },
+
     listarUsuarios: (req, res) => {
 
         Usuario.listar((err, results) => {
