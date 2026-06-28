@@ -64,59 +64,43 @@
 
     });
     
-    form.addEventListener('submit', function(e) {
-
+   form.addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const email =
-            document.getElementById('email').value;
-
-        const senha =
-            document.getElementById('senha').value;
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
 
         fetch('http://localhost:3000/login', {
-
             method: 'POST',
-
             headers: {
                 'Content-Type': 'application/json'
             },
-
-            body: JSON.stringify({
-                email,
-                senha
-            })
-
+            body: JSON.stringify({ email, senha })
         })
-
-        .then(res => res.json())
-
-        .then(data => {
-
-            if (data.erro) {
-
-                alert(data.erro);
-                return;
-
+        .then(res => {
+            // Se o servidor responder com erro (ex: 400 ou 401), joga para o catch tratar
+            if (!res.ok) {
+                return res.json().then(errData => { throw errData; });
             }
-
+            return res.json();
+        })
+        .then(data => {
+            // Se chegou aqui, deu sucesso! Guardamos os dados e vamos para a home
             localStorage.setItem(
                 'usuarioLogado',
-                JSON.stringify(data.usuario)
+                JSON.stringify(data)
             );
-
             window.location.href = 'home.html';
-
         })
-
         .catch(err => {
-
             console.error(err);
-
-            alert('Erro ao conectar com o servidor');
-
+            // Mostra o erro exato do seu backend ("Senha incorreta" ou "Usuário não encontrado")
+            if (err && err.erro) {
+                alert(err.erro);
+            } else {
+                alert('Erro ao conectar com o servidor');
+            }
         });
-
     });
 
     </script>

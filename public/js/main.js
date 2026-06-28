@@ -19,7 +19,7 @@ if (form) {
         .then(res => res.json())
         .then(data => {
             console.log(data);
-            alert('Cadastro feito de verdade!');
+            alert('Cadastro feito!');
         })
         .catch(err => {
             console.error(err);

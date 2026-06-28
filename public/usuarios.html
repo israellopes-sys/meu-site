@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Usuários</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Gerenciar <span class="text-highlight">Usuários</span></h1>
+
+    <div id="lista-usuarios" class="music-list"></div>
+
+    <a href="home.html">
+        <button class="btn-secondary">Voltar</button>
+    </a>
+
+</div>
+
+<script>
+
+async function carregarUsuarios(){
+
+    const resposta = await fetch("http://localhost:3000/usuarios");
+
+    const usuarios = await resposta.json();
+
+    const lista = document.getElementById("lista-usuarios");
+
+    lista.innerHTML = "";
+
+    usuarios.forEach(usuario => {
+
+        lista.innerHTML += `
+            <div class="topic-card topic-blue">
+
+                <h3>${usuario.nome}</h3>
+
+                <p>${usuario.email}</p>
+
+                <button onclick="editarUsuario(${usuario.id_usuario})">
+                    ✏️ Editar
+                </button>
+
+                <button onclick="excluirUsuario(${usuario.id_usuario})">
+                    🗑️ Excluir
+                </button>
+
+            </div>
+        `;
+
+    });
+
+}
+
+async function excluirUsuario(id){
+
+    const confirmar = confirm("Deseja realmente excluir este usuário?");
+
+    if(!confirmar) return;
+
+    const resposta = await fetch(`http://localhost:3000/usuarios/${id}`,{
+        method:"DELETE"
+    });
+
+    if(resposta.ok){
+
+        alert("Usuário removido com sucesso!");
+
+        carregarUsuarios();
+
+    }else{
+
+        alert("Erro ao remover usuário.");
+
+    }
+
+}
+
+
+async function editarUsuario(id){
+
+    const nome = prompt("Novo nome:");
+
+    if(nome == null) return;
+
+    const email = prompt("Novo email:");
+
+    if(email == null) return;
+
+    const senha = prompt("Nova senha:");
+
+    if(senha == null) return;
+
+    const resposta = await fetch(`http://localhost:3000/usuarios/${id}`,{
+
+        method:"PUT",
+
+        headers:{
+            "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+            nome,
+            email,
+            senha
+        })
+
+    });
+
+    if(resposta.ok){
+
+        alert("Usuário atualizado!");
+
+        carregarUsuarios();
+
+    }else{
+
+        alert("Erro ao atualizar.");
+
+    }
+
+}
+
+carregarUsuarios();
+
+</script>
+
+</body>
+</html>

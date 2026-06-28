@@ -1,12 +1,16 @@
 INSERT INTO Usuario (nome, email, senha)
 VALUES
-('Israel', 'israel@email.com', '123456'),
-('Maria', 'maria@email.com', '654321');
+('Israel', 'israel@gmail.com', '123456'),
+('Maria', 'maria@gmail.com', '654321'),
+('Carlos', 'carlos@gmail.com', '123456');
 
 INSERT INTO Musica (titulo, artista)
 VALUES
 ('Chega de Saudade', 'Tom Jobim'),
-('Aquarela do Brasil', 'Ary Barroso');
+('Aquarela do Brasil', 'Ary Barroso'),
+('Anunciação', 'Alceu Valença'),
+('Construção', 'Chico Buarque'),
+('Garota de Ipanema'. 'Tom Jobim e Vinicius de Moraes');
 
 INSERT INTO Topico (titulo, descricao)
 VALUES

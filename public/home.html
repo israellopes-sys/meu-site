@@ -15,22 +15,39 @@
 
         <div id="lista-musicas" class="music-list"></div>
 
+        <a href="usuarios.html">
+            <button class="btn-primary">Gerenciar Usuários</button>
+        </a>
+        
         <button id="btnLogout" class="btn-secondary">
             Sair
         </button>
+
 
     </div>
 
     <script>
 
-    const usuario =
-        JSON.parse(localStorage.getItem('usuarioLogado'));
+    const dadosLogin = JSON.parse(localStorage.getItem('usuarioLogado'));
 
+    // Criamos a variável 'usuario' exatamente como o resto da sua tela espera!
+    let usuario = null;
+
+    if (dadosLogin) {
+        // Se o backend mandou envelopado em .usuario, a gente desencaixota:
+        if (dadosLogin.usuario) {
+            usuario = dadosLogin.usuario;
+        } else {
+            usuario = dadosLogin; // Caso contrário, usa o objeto direto
+        }
+    }
+
+    // Agora o seu código original volta a funcionar sem bugar nada:
     if (usuario) {
-
-        document.getElementById('usuario-logado')
-            .textContent = `Olá, ${usuario.nome} 👋`;
-
+        const elementoUsuario = document.getElementById('usuario-logado');
+        if (elementoUsuario) {
+            elementoUsuario.textContent = `Olá, ${usuario.nome} 👋`;
+        }
     }
         JSON.parse(localStorage.getItem('usuarioLogado'));
 

@@ -1,43 +1,24 @@
-### LISTAR USUÁRIOS
-GET http://localhost:3000/usuarios
+### =================================================================
+### CONFIGURAÇÕES GERAIS
+### =================================================================
+@baseUrl = http://localhost:3000
 
-###
-GET http://localhost:3000/musicas/1
+### =================================================================
+### FLUXO DE USUÁRIOS & AUTENTICAÇÃO
+### =================================================================
 
-
-### Listar Músicas
-GET http://localhost:3000/musicas
-
-###
-GET http://localhost:3000/comentarios/1
-###
-GET http://localhost:3000/comentarios
-
-### CADASTRAR USUÁRIO
-POST http://localhost:3000/usuarios
+### CADASTRAR USUÁRIO (Sucesso)
+POST {{baseUrl}}/usuarios
 Content-Type: application/json
 
 {
-    "nome": "teste2",
-    "email": "teste2@gmail.com",
+    "nome": "Nathalia",
+    "email": "Nath@gmail.com",
     "senha": "123456"
 }
 
-###
-
-POST http://localhost:3000/comentarios
-Content-Type: application/json
-
-{
-    "texto": "Comentário criado pelo teste.http",
-    "id_usuario": 1,
-    "id_musica": 1
-}
-
-###
-
-### TESTE DE CAMPO VAZIO
-POST http://localhost:3000/usuarios
+### TESTE DE ERRO: CADASTRAR COM CAMPOS VAZIOS
+POST {{baseUrl}}/usuarios
 Content-Type: application/json
 
 {
@@ -46,29 +27,59 @@ Content-Type: application/json
     "senha": ""
 }
 
-###
-
-### ATUALIZAR USUÁRIO
-PUT http://localhost:3000/usuarios/1
+### REALIZAR LOGIN
+POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-    "nome": "Israell Atualizado",
-    "email": "israel@email.com",
-    "senha": "123"
+    "email": "Nath@gmail.com",
+    "senha": "123456"
 }
 
-###
+### LISTAR TODOS OS USUÁRIOS
+GET {{baseUrl}}/usuarios
 
-### REMOVER USUÁRIO
-DELETE http://localhost:3000/usuarios/1
-
-
-###
-POST http://localhost:3000/login
+### ATUALIZAR DADOS DO USUÁRIO
+PUT {{baseUrl}}/usuarios/1
 Content-Type: application/json
 
 {
+    "nome": "Israel Atualizado",
     "email": "israel@email.com",
     "senha": "123456"
+}
+
+### REMOVER USUÁRIO
+DELETE {{baseUrl}}/usuarios/1
+
+
+### =================================================================
+### FLUXO DE MÚSICAS
+### =================================================================
+
+### LISTAR TODAS AS MÚSICAS
+GET {{baseUrl}}/musicas
+
+### BUSCAR MÚSICA POR ID
+GET {{baseUrl}}/musicas/1
+
+
+### =================================================================
+### FLUXO DE COMENTÁRIOS
+### =================================================================
+
+### LISTAR TODOS OS COMENTÁRIOS
+GET {{baseUrl}}/comentarios
+
+### BUSCAR COMENTÁRIOS DE UMA MÚSICA ESPECÍFICA
+GET {{baseUrl}}/comentarios/1
+
+### CRIAR UM NOVO COMENTÁRIO
+POST {{baseUrl}}/comentarios
+Content-Type: application/json
+
+{
+    "texto": "Comentário incrível criado pelo teste.http! 🎶",
+    "id_usuario": 1,
+    "id_musica": 1
 }

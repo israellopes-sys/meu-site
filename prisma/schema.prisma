@@ -1,0 +1,63 @@
+generator erd {
+  provider = "prisma-erd-generator"
+  theme    = "forest"
+  output   = "../diagrama.md"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario Int @id @default(autoincrement())
+  nome String
+  email String @unique
+  senha String
+
+  comentarios Comentario[]
+  curtidas Curtida[]
+}
+
+model Musica {
+  id_musica Int @id @default(autoincrement())
+  titulo String
+  artista String
+  capa String?
+  arquivo_audio String?
+
+  comentarios Comentario[]
+  curtidas Curtida[]
+}
+
+model Comentario {
+  id_comentario Int @id @default(autoincrement())
+  texto String
+  data_comentario String
+
+  id_usuario Int
+  id_musica Int
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  musica Musica @relation(fields: [id_musica], references: [id_musica])
+}
+
+model Curtida {
+  id_usuario Int
+  id_musica Int
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  musica Musica @relation(fields: [id_musica], references: [id_musica])
+
+  @@id([id_usuario, id_musica])
+}
+
+model Topico {
+  id_topico Int @id @default(autoincrement())
+  titulo String
+  descricao String
+}

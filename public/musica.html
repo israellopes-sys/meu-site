@@ -42,22 +42,65 @@
     </div>
 
 <script>
-
+// Captura os parâmetros da URL para saber qual música carregar
 const params = new URLSearchParams(window.location.search);
 window.idMusica = params.get('id');
 
-fetch(`http://localhost:3000/musicas/${window.idMusica}`)
-    .then(res => res.json())
-    .then(musica => {
+// Se não houver ID na URL, volta para a home para não bugar o layout
+if (!window.idMusica) {
+    alert("Nenhuma música foi selecionada!");
+    window.location.href = 'home.html';
+}
 
+// 1. CARREGAR OS DADOS DA MÚSICA SELECIONADA (READ)
+async function carregarDetalhesMusica() {
+    try {
+        const resposta = await fetch(`http://localhost:3000/musicas/${window.idMusica}`);
+        
+        if (!resposta.ok) {
+            throw new Error("Música não encontrada no banco de dados.");
+        }
+        
+        const musica = await resposta.json();
+
+        // Injeta os dados dinamicamente nas tags HTML
         document.getElementById('titulo').textContent = musica.titulo;
         document.getElementById('artista').textContent = musica.artista;
+    } catch (err) {
+        console.error("Erro ao buscar detalhes da música:", err);
+        document.getElementById('titulo').textContent = "Erro ao carregar";
+        document.getElementById('artista').textContent = "Música não encontrada";
+    }
+}
 
-    })
-    .catch(err => {
-        console.error(err);
-    });
+// Executa a função assim que a página termina de carregar
+document.addEventListener("DOMContentLoaded", carregarDetalhesMusica);
 
+// Funções auxiliares para os botões da interface (Player simulado/Front-end)
+let tocando = false;
+function togglePlay() {
+    tocando = !tocando;
+    const icone = document.getElementById('playIcon');
+    const disco = document.querySelector('.album-art i');
+    
+    if (tocando) {
+        icone.className = "fa-solid fa-pause";
+        disco.classList.add('fa-spin'); // Faz o disco girar
+    } else {
+        icone.className = "fa-solid fa-play";
+        disco.classList.remove('fa-spin'); // Pausa o giro do disco
+    }
+}
+
+function toggleLike(botao) {
+    botao.classList.toggle('liked');
+    // Aqui você pode integrar com o fetch para a rota POST /curtidas no futuro se desejar!
+    if (botao.classList.contains('liked')) {
+        botao.innerHTML = '<i class="fa-solid fa-heart text-red-500"></i> Curtido';
+    } else {
+        botao.innerHTML = '<i class="fa-solid fa-heart"></i> Curtir';
+    }
+}
 </script>
 
 <script src="js/script.js"></script>

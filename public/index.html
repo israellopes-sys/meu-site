@@ -66,74 +66,67 @@
    
 
     <!-- SCRIPT -->
-    <script src="js/main.js"></script>
-
     <script>
+    const campoSenha = document.getElementById('senha');
+    const checkbox = document.getElementById('mostrarSenha');
 
-
-    const campoSenha =
-        document.getElementById('senha');
-    
-
-    const checkbox =
-        document.getElementById('mostrarSenha');
-
+    // Mostrar/Esconder Senha
     checkbox.addEventListener('change', () => {
-
-        if (checkbox.checked) {
-
-            campoSenha.type = 'text';
-
-        } else {
-
-            campoSenha.type = 'password';
-
-        }
-
+        campoSenha.type = checkbox.checked ? 'text' : 'password';
     });
-    const formCadastroPage = document.getElementById('formCadastro'); // Certifique-se de que seu <form> tem esse id="formCadastro"
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede a página de atualizar sozinha
+    const form = document.getElementById('formCadastro');
+    let enviando = false; // Trava de segurança contra cliques duplos
 
-        // 1. Pega os valores que o usuário digitou
-        const nome = document.getElementById('nome').value;
-        const email = document.getElementById('email').value;
-        const senha = document.getElementById('senha').value;
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Impede o navegador de recarregar a página
 
-        if (senha.length < 6) {
+            if (enviando) return; // Se já enviou uma requisição, ignora o clique fantasma
 
-            alert('A senha deve possuir pelo menos 6 caracteres.');
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senha = document.getElementById('senha').value;
 
-            return;
-
-        }
-
-        // 2. Envia os dados para o seu back-end (ajuste a URL se a sua rota for diferente)
-        fetch('http://localhost:3000/usuarios', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                nome: nome,
-                email: email,
-                senha: senha
-            })
-        })
-        .then(res => {
-            if (res.ok) {
-                alert('Conta criada com sucesso! Faça seu login.');
-                window.location.href = 'login.html'; // 3. Redireciona para o login
-            } else {
-                alert('Erro ao criar conta. Verifique os dados ou tente outro e-mail.');
+            if (senha.length < 6) {
+                alert('A senha deve possuir pelo menos 6 caracteres.');
+                return;
             }
-        })
-        .catch(err => {
-            console.error('Erro na requisição:', err);
-            alert('Não foi possível conectar ao servidor.');
+
+            enviando = true; // Ativa a trava
+
+            fetch('http://localhost:3000/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nome, email, senha })
+            })
+            .then(res => {
+                // Se não for sucesso (ex: e-mail duplicado), extrai o erro do backend
+                if (!res.ok) {
+                    return res.json().then(errData => { throw errData; });
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert('Conta criada com sucesso! Faça seu login. 🎉');
+                window.location.href = 'login.html'; 
+            })
+            .catch(err => {
+                console.error('Erro na requisição:', err);
+                // Se o backend mandou a mensagem bonitinha, exibe ela ("Email já cadastrado")
+                if (err && err.erro) {
+                    alert(err.erro);
+                } else {
+                    alert('Não foi possível conectar ao servidor.');
+                }
+            })
+            .finally(() => {
+                enviando = false; // Libera a trava para o usuário poder tentar de novo caso erre
+            });
         });
-    });
+    }
     </script>
 
 </body>

@@ -40,70 +40,122 @@
 
 
 <script>
-
 const params = new URLSearchParams(window.location.search);
 const idMusica = params.get('id');
 
-fetch(`http://localhost:3000/comentarios/${idMusica}`)
-    .then(res => res.json())
-    .then(comentarios => {
+// Se não houver id da música, impede o bug e volta para a home
+if (!idMusica) {
+    alert("Nenhuma música selecionada para ver os comentários.");
+    window.location.href = 'home.html';
+}
+
+const API_URL = 'http://localhost:3000';
+
+// 1. CARREGAR COMENTÁRIOS DA MÚSICA (READ)
+async function carregarComentarios() {
+    try {
+        const res = await fetch(`${API_URL}/comentarios/${idMusica}`);
+        const comentarios = await res.json();
 
         const lista = document.getElementById('lista-comentarios');
+        lista.innerHTML = ''; // Limpa a lista antes de renderizar para não duplicar
+
+        if (comentarios.length === 0) {
+            lista.innerHTML = `<p class="text-gray-400">Seja o primeiro a comentar sobre essa música! 💬</p>`;
+            return;
+        }
 
         comentarios.forEach(comentario => {
+            // Formatação simples da data vinda do banco
+            const dataFormatada = new Date(comentario.data_comentario).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            // Se o seu backend retornar o relacionamento com o usuário, dá para mostrar o nome dele aqui
+            const nomeUsuario = comentario.usuario ? comentario.usuario.nome : "Usuário";
 
             lista.innerHTML += `
-                <div class="topic-card">
-                    <p>${comentario.texto}</p>
-                    <small>${comentario.data_comentario}</small>
+                <div class="topic-card" style="margin-bottom: 12px; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.05);">
+                    <strong style="color: #4ade80; display: block; margin-bottom: 5px;">${nomeUsuario}</strong>
+                    <p style="margin: 0 0 8px 0;">${comentario.texto}</p>
+                    <small style="color: #888; font-size: 0.75rem;">${dataFormatada}</small>
                 </div>
             `;
+        });
+    } catch (err) {
+        console.error("Erro ao buscar comentários:", err);
+    }
+}
 
+// 2. ENVIAR COMENTÁRIO (CREATE)
+let enviandoComentario = false;
+
+async function enviarComentario() {
+    if (enviandoComentario) return;
+
+    const campoTexto = document.getElementById('novoComentario');
+    const texto = campoTexto.value.trim();
+
+    if (!texto) {
+        alert("Digite alguma coisa antes de enviar!");
+        return;
+    }
+
+    const usuarioRaw = localStorage.getItem('usuarioLogado');
+    let dadosLogin = null;
+
+    try {
+        if (usuarioRaw) {
+            dadosLogin = JSON.parse(usuarioRaw);
+        }
+    } catch (e) {
+        console.error("Erro ao ler dados do localStorage:", e);
+    }
+    
+    // Verifica se o objeto de login e a propriedade 'usuario' existem
+    if (!dadosLogin || !dadosLogin.usuario) {
+        alert("Você precisa estar logado para comentar!");
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // Captura o ID correto de acordo com o seu console.log (dadosLogin.usuario.id)
+    const idUsuarioReal = dadosLogin.usuario.id;
+
+    try {
+        enviandoComentario = true;
+
+        const res = await fetch(`${API_URL}/comentarios`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                texto: texto,
+                id_usuario: Number(idUsuarioReal), // Envia o ID 7 da Nathalia de forma numérica
+                id_musica: Number(idMusica)
+            })
         });
 
-    })
-    .catch(err => {
-        console.error(err);
-    });
-
-function enviarComentario() {
-
-    const texto =
-        document.getElementById('novoComentario').value;
-
-    fetch('http://localhost:3000/comentarios', {
-
-        method: 'POST',
-
-        headers: {
-            'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-
-            texto: texto,
-            id_usuario: 1,
-            id_musica: idMusica
-
-        })
-    })
-
-    .then(res => res.json())
-
-    .then(data => {
-
-        alert('Comentário enviado!');
-
-        location.reload();
-
-    })
-
-    .catch(err => {
-
-        console.error(err);
-
-    });
+        if (res.ok) {
+            campoTexto.value = ''; // Limpa a caixa de texto
+            carregarComentarios(); // Recarrega a lista para o comentário aparecer na hora!
+        } else {
+            alert("Erro ao enviar o comentário. Tente novamente.");
+        }
+    } catch (err) {
+        console.error("Erro na requisição:", err);
+    } finally {
+        enviandoComentario = false;
+    }
 }
+
+// Dispara o carregamento dos comentários assim que a tela abre
+document.addEventListener('DOMContentLoaded', carregarComentarios);
 </script>
 
 </body>
