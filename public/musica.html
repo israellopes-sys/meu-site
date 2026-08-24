@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Música - MPB Interativa</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     >
+
 </head>
 
+
 <body>
+
+    <div id="global-header"></div>
 
     <main class="music-page">
 
@@ -29,7 +42,7 @@
         <section class="music-player">
 
             <!-- CAPA -->
-            <div class="music-cover" id="music-cover">
+            <div class="music-cover">
 
                 <img
                     id="capa-musica"
@@ -65,7 +78,7 @@
             </div>
 
 
-            <!-- PLAYER DE ÁUDIO -->
+            <!-- PLAYER -->
             <div class="audio-section">
 
                 <audio
@@ -74,6 +87,7 @@
                 ></audio>
 
 
+                <!-- PROGRESSO -->
                 <div class="audio-progress">
 
                     <span id="tempoAtual">
@@ -95,18 +109,73 @@
                 </div>
 
 
-                <div class="audio-controls">
+                <!-- CONTROLES PRINCIPAIS -->
+                <div class="audio-main-controls">
+
+                    <button
+                        id="btnAnterior"
+                        class="audio-control-btn"
+                        type="button"
+                        aria-label="Música anterior"
+                        title="Música anterior"
+                    >
+                        <i class="fa-solid fa-backward-step"></i>
+                    </button>
+
 
                     <button
                         id="btnPlay"
                         class="btn-play"
+                        type="button"
                         aria-label="Reproduzir"
+                        title="Reproduzir"
                     >
                         <i
                             id="playIcon"
                             class="fa-solid fa-play"
                         ></i>
                     </button>
+
+
+                    <button
+                        id="btnProxima"
+                        class="audio-control-btn"
+                        type="button"
+                        aria-label="Próxima música"
+                        title="Próxima música"
+                    >
+                        <i class="fa-solid fa-forward-step"></i>
+                    </button>
+
+                </div>
+
+
+                <!-- VOLUME -->
+                <div class="audio-volume">
+
+                    <button
+                        id="btnMute"
+                        class="audio-volume-btn"
+                        type="button"
+                        aria-label="Silenciar"
+                        title="Silenciar"
+                    >
+                        <i
+                            id="volumeIcon"
+                            class="fa-solid fa-volume-high"
+                        ></i>
+                    </button>
+
+
+                    <input
+                        id="barraVolume"
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value="1"
+                        aria-label="Volume"
+                    >
 
                 </div>
 
@@ -144,6 +213,13 @@
                 class="music-user"
             ></p>
 
+
+            <!-- INDICADOR -->
+            <p
+                id="status-player"
+                class="music-player-status"
+            ></p>
+
         </section>
 
     </main>
@@ -151,52 +227,74 @@
 
 <script>
 
-// ==========================================
+// ========================================================
 // AUTENTICAÇÃO
-// ==========================================
+// ========================================================
 
-const token = localStorage.getItem('token');
-const usuarioRaw = localStorage.getItem('usuarioLogado');
+const token =
+    localStorage.getItem('token');
+
+const usuarioRaw =
+    localStorage.getItem('usuarioLogado');
+
 
 if (!token || !usuarioRaw) {
 
-    window.location.href = 'login.html';
+    window.location.href =
+        'login.html';
 
 }
+
 
 let usuario = null;
 
 try {
 
-    usuario = JSON.parse(usuarioRaw);
+    usuario =
+        JSON.parse(usuarioRaw);
 
-} catch (err) {
-
-    console.error(
-        'Erro ao ler usuário:',
-        err
-    );
+} catch (erro) {
 
     localStorage.removeItem('token');
+
     localStorage.removeItem('usuarioLogado');
 
-    window.location.href = 'login.html';
+    window.location.href =
+        'login.html';
 
 }
 
 
-// ==========================================
-// ELEMENTOS
-// ==========================================
+// ========================================================
+// PARÂMETROS
+// ========================================================
 
 const params =
     new URLSearchParams(
         window.location.search
     );
 
-const idMusica =
-    params.get('id');
+const idMusicaInicial =
+    Number(
+        params.get('id')
+    );
 
+
+if (!idMusicaInicial) {
+
+    alert(
+        'Nenhuma música foi selecionada.'
+    );
+
+    window.location.href =
+        'home.html';
+
+}
+
+
+// ========================================================
+// ELEMENTOS
+// ========================================================
 
 const audio =
     document.getElementById(
@@ -211,6 +309,31 @@ const btnPlay =
 const playIcon =
     document.getElementById(
         'playIcon'
+    );
+
+const btnAnterior =
+    document.getElementById(
+        'btnAnterior'
+    );
+
+const btnProxima =
+    document.getElementById(
+        'btnProxima'
+    );
+
+const btnMute =
+    document.getElementById(
+        'btnMute'
+    );
+
+const volumeIcon =
+    document.getElementById(
+        'volumeIcon'
+    );
+
+const barraVolume =
+    document.getElementById(
+        'barraVolume'
     );
 
 const barraProgresso =
@@ -228,40 +351,71 @@ const duracao =
         'duracao'
     );
 
-
-// ==========================================
-// VALIDAR ID DA MÚSICA
-// ==========================================
-
-if (!idMusica) {
-
-    alert(
-        'Nenhuma música foi selecionada.'
+const titulo =
+    document.getElementById(
+        'titulo'
     );
 
-    window.location.href =
-        'home.html';
+const artista =
+    document.getElementById(
+        'artista'
+    );
 
-}
+const capa =
+    document.getElementById(
+        'capa-musica'
+    );
+
+const capaPlaceholder =
+    document.getElementById(
+        'capa-placeholder'
+    );
+
+const comentarios =
+    document.getElementById(
+        'btnComentarios'
+    );
+
+const usuarioElemento =
+    document.getElementById(
+        'usuario-logado'
+    );
+
+const statusPlayer =
+    document.getElementById(
+        'status-player'
+    );
 
 
-// ==========================================
-// EXIBIR USUÁRIO
-// ==========================================
+// ========================================================
+// ESTADO
+// ========================================================
+
+let musicas = [];
+
+let indiceAtual = -1;
+
+let idMusicaAtual =
+    idMusicaInicial;
+
+let volumeAnterior = 1;
+
+
+// ========================================================
+// USUÁRIO
+// ========================================================
 
 if (usuario) {
 
-    document.getElementById(
-        'usuario-logado'
-    ).textContent =
+    usuarioElemento.textContent =
         `Olá, ${usuario.nome} 👋`;
 
 }
 
 
-// ==========================================
+// ========================================================
 // FORMATAR TEMPO
-// ==========================================
+// ========================================================
 
 function formatarTempo(segundos) {
 
@@ -270,10 +424,14 @@ function formatarTempo(segundos) {
     }
 
     const minutos =
-        Math.floor(segundos / 60);
+        Math.floor(
+            segundos / 60
+        );
 
     const segundosRestantes =
-        Math.floor(segundos % 60);
+        Math.floor(
+            segundos % 60
+        );
 
     return `${minutos}:${String(
         segundosRestantes
@@ -282,21 +440,284 @@ function formatarTempo(segundos) {
 }
 
 
-// ==========================================
-// CARREGAR MÚSICA
-// ==========================================
+// ========================================================
+// HISTÓRICO
+// ========================================================
 
-async function carregarDetalhesMusica() {
+function salvarMusicaRecente(musica) {
+
+    try {
+
+        let recentes =
+            JSON.parse(
+                localStorage.getItem(
+                    'musicasRecentes'
+                ) || '[]'
+            );
+
+
+        recentes =
+            recentes.filter(
+                item =>
+                    item.id_musica !==
+                    musica.id_musica
+            );
+
+
+        recentes.unshift({
+
+            id_musica:
+                musica.id_musica,
+
+            titulo:
+                musica.titulo,
+
+            artista:
+                musica.artista,
+
+            capa:
+                musica.capa || null,
+
+            data:
+                Date.now()
+
+        });
+
+
+        recentes =
+            recentes.slice(
+                0,
+                5
+            );
+
+
+        localStorage.setItem(
+            'musicasRecentes',
+            JSON.stringify(
+                recentes
+            )
+        );
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao salvar histórico:',
+            erro
+        );
+
+    }
+
+}
+
+
+// ========================================================
+// ATUALIZAR URL
+// ========================================================
+
+function atualizarUrl(id) {
+
+    const novaUrl =
+        `musica.html?id=${id}`;
+
+    window.history.replaceState(
+        {},
+        '',
+        novaUrl
+    );
+
+}
+
+
+// ========================================================
+// CARREGAR MÚSICA
+// ========================================================
+
+function carregarMusica(
+    musica,
+    iniciar = false
+) {
+
+    if (!musica) {
+        return;
+    }
+
+
+    indiceAtual =
+        musicas.findIndex(
+            item =>
+                Number(
+                    item.id_musica
+                ) === Number(
+                    musica.id_musica
+                )
+        );
+
+        idMusicaAtual = Number(
+            musica.id_musica
+        );
+
+
+    document.title =
+        `${musica.titulo} - MPB Interativa`;
+
+
+    titulo.textContent =
+        musica.titulo;
+
+
+    artista.textContent =
+        musica.artista;
+
+
+    atualizarUrl(
+        musica.id_musica
+    );
+
+
+    comentarios.href =
+        `comentarios.html?id=${musica.id_musica}`;
+
+
+    salvarMusicaRecente(
+        musica
+    );
+
+
+    // ----------------------------------------
+    // CAPA
+    // ----------------------------------------
+
+    if (musica.capa) {
+
+        capa.src =
+            musica.capa;
+
+        capa.style.display =
+            'block';
+
+        capaPlaceholder.style.display =
+            'none';
+
+    } else {
+
+        capa.removeAttribute(
+            'src'
+        );
+
+        capa.style.display =
+            'none';
+
+        capaPlaceholder.style.display =
+            'flex';
+
+    }
+
+
+    // ----------------------------------------
+    // ÁUDIO
+    // ----------------------------------------
+
+    audio.pause();
+
+    audio.currentTime = 0;
+
+    barraProgresso.value = 0;
+
+    tempoAtual.textContent =
+        '0:00';
+
+    duracao.textContent =
+        '0:00';
+
+
+    if (musica.arquivo_audio) {
+
+        audio.src =
+            musica.arquivo_audio;
+
+        btnPlay.disabled =
+            false;
+
+        statusPlayer.textContent =
+            '';
+
+    } else {
+
+        audio.removeAttribute(
+            'src'
+        );
+
+        audio.load();
+
+        btnPlay.disabled =
+            true;
+
+        statusPlayer.textContent =
+            'Esta música ainda não possui áudio disponível.';
+
+    }
+
+
+    atualizarBotoesNavegacao();
+
+    verificarCurtida();
+
+
+    if (iniciar && musica.arquivo_audio) {
+
+        audio
+            .play()
+            .catch(
+                erro =>
+                    console.warn(
+                        'Reprodução automática bloqueada:',
+                        erro
+                    )
+            );
+
+    }
+
+}
+
+
+// ========================================================
+// CARREGAR TODAS AS MÚSICAS
+// ========================================================
+
+async function carregarMusicas() {
 
     try {
 
         const resposta =
             await fetch(
-                `http://localhost:3000/musicas/${idMusica}`
+                'http://localhost:3000/musicas'
             );
 
 
         if (!resposta.ok) {
+
+            throw new Error(
+                'Erro ao buscar músicas.'
+            );
+
+        }
+
+
+        musicas =
+            await resposta.json();
+
+
+        const musicaAtual =
+            musicas.find(
+                musica =>
+                    Number(
+                        musica.id_musica
+                    ) ===
+                    idMusicaInicial
+            );
+
+
+        if (!musicaAtual) {
 
             throw new Error(
                 'Música não encontrada.'
@@ -305,108 +726,113 @@ async function carregarDetalhesMusica() {
         }
 
 
-        const musica =
-            await resposta.json();
+        carregarMusica(
+            musicaAtual
+        );
 
-
-        document.title =
-            `${musica.titulo} - MPB Interativa`;
-
-
-        document.getElementById(
-            'titulo'
-        ).textContent =
-            musica.titulo;
-
-
-        document.getElementById(
-            'artista'
-        ).textContent =
-            musica.artista;
-
-
-        // ----------------------------------
-        // CAPA
-        // ----------------------------------
-
-        if (musica.capa) {
-
-            const capa =
-                document.getElementById(
-                    'capa-musica'
-                );
-
-            capa.src =
-                musica.capa;
-
-            capa.style.display =
-                'block';
-
-            document.getElementById(
-                'capa-placeholder'
-            ).style.display =
-                'none';
-
-        }
-
-
-        // ----------------------------------
-        // ÁUDIO
-        // ----------------------------------
-
-        if (musica.arquivo_audio) {
-
-            audio.src =
-                musica.arquivo_audio;
-
-        } else {
-
-            console.warn(
-                'Esta música não possui arquivo de áudio.'
-            );
-
-            btnPlay.disabled = true;
-
-        }
-
-
-        // ----------------------------------
-        // COMENTÁRIOS
-        // ----------------------------------
-
-        document.getElementById(
-            'btnComentarios'
-        ).href =
-            `comentarios.html?id=${idMusica}`;
-
-
-    } catch (err) {
+    } catch (erro) {
 
         console.error(
-            'Erro ao carregar música:',
-            err
+            'Erro ao carregar músicas:',
+            erro
         );
 
 
-        document.getElementById(
-            'titulo'
-        ).textContent =
+        titulo.textContent =
             'Erro ao carregar';
 
-
-        document.getElementById(
-            'artista'
-        ).textContent =
+        artista.textContent =
             'Música não encontrada';
+
+        statusPlayer.textContent =
+            'Não foi possível carregar esta música.';
 
     }
 
 }
 
 
-// ==========================================
+// ========================================================
+// NAVEGAÇÃO
+// ========================================================
+
+function atualizarBotoesNavegacao() {
+
+    btnAnterior.disabled =
+        indiceAtual <= 0;
+
+
+    btnProxima.disabled =
+        indiceAtual === -1 ||
+        indiceAtual >=
+            musicas.length - 1;
+
+}
+
+
+function tocarAnterior() {
+
+    if (
+        indiceAtual <= 0
+    ) {
+        return;
+    }
+
+
+    const musicaAnterior =
+        musicas[
+            indiceAtual - 1
+        ];
+
+
+    carregarMusica(
+        musicaAnterior,
+        true
+    );
+
+}
+
+
+function tocarProxima() {
+
+    if (
+        indiceAtual < 0 ||
+        indiceAtual >=
+            musicas.length - 1
+    ) {
+        return;
+    }
+
+
+    const musicaProxima =
+        musicas[
+            indiceAtual + 1
+        ];
+
+
+    carregarMusica(
+        musicaProxima,
+        true
+    );
+
+}
+
+
+btnAnterior.addEventListener(
+    'click',
+    tocarAnterior
+);
+
+
+btnProxima.addEventListener(
+    'click',
+    tocarProxima
+);
+
+
+// ========================================================
 // PLAY / PAUSE
-// ==========================================
+// ========================================================
 
 btnPlay.addEventListener(
     'click',
@@ -417,23 +843,30 @@ btnPlay.addEventListener(
         }
 
 
-        if (audio.paused) {
+        try {
 
-            await audio.play();
+            if (audio.paused) {
 
-        } else {
+                await audio.play();
 
-            audio.pause();
+            } else {
+
+                audio.pause();
+
+            }
+
+        } catch (erro) {
+
+            console.error(
+                'Erro ao reproduzir:',
+                erro
+            );
 
         }
 
     }
 );
 
-
-// ==========================================
-// ATUALIZAR BOTÃO PLAY
-// ==========================================
 
 audio.addEventListener(
     'play',
@@ -444,6 +877,11 @@ audio.addEventListener(
 
         btnPlay.setAttribute(
             'aria-label',
+            'Pausar'
+        );
+
+        btnPlay.setAttribute(
+            'title',
             'Pausar'
         );
 
@@ -463,13 +901,32 @@ audio.addEventListener(
             'Reproduzir'
         );
 
+        btnPlay.setAttribute(
+            'title',
+            'Reproduzir'
+        );
+
     }
 );
 
 
-// ==========================================
+// ========================================================
+// PRÓXIMA AUTOMÁTICA
+// ========================================================
+
+audio.addEventListener(
+    'ended',
+    () => {
+
+        tocarProxima();
+
+    }
+);
+
+
+// ========================================================
 // DURAÇÃO
-// ==========================================
+// ========================================================
 
 audio.addEventListener(
     'loadedmetadata',
@@ -484,9 +941,9 @@ audio.addEventListener(
 );
 
 
-// ==========================================
+// ========================================================
 // PROGRESSO
-// ==========================================
+// ========================================================
 
 audio.addEventListener(
     'timeupdate',
@@ -498,9 +955,10 @@ audio.addEventListener(
 
 
         const progresso =
-            (audio.currentTime /
-                audio.duration) *
-            100;
+            (
+                audio.currentTime /
+                audio.duration
+            ) * 100;
 
 
         barraProgresso.value =
@@ -526,62 +984,335 @@ barraProgresso.addEventListener(
 
 
         audio.currentTime =
-            (barraProgresso.value / 100) *
-            audio.duration;
+            (
+                Number(
+                    barraProgresso.value
+                ) / 100
+            ) * audio.duration;
 
     }
 );
 
 
-// ==========================================
-// CURTIR — VISUAL POR ENQUANTO
-// ==========================================
+// ========================================================
+// VOLUME
+// ========================================================
 
-document
-    .getElementById('btnCurtir')
-    .addEventListener(
-        'click',
-        function () {
+barraVolume.addEventListener(
+    'input',
+    () => {
 
-            this.classList.toggle(
-                'liked'
+        const volume =
+            Number(
+                barraVolume.value
             );
 
 
-            if (
-                this.classList.contains(
-                    'liked'
-                )
-            ) {
+        audio.volume =
+            volume;
 
-                this.innerHTML = `
-                    <i class="fa-solid fa-heart"></i>
-                    Curtido
-                `;
 
-            } else {
+        audio.muted =
+            volume === 0;
 
-                this.innerHTML = `
-                    <i class="fa-regular fa-heart"></i>
-                    Curtir
-                `;
 
-            }
+        atualizarIconeVolume();
+
+    }
+);
+
+
+btnMute.addEventListener(
+    'click',
+    () => {
+
+        if (audio.muted) {
+
+            audio.muted = false;
+
+            audio.volume =
+                volumeAnterior || 1;
+
+            barraVolume.value =
+                audio.volume;
+
+        } else {
+
+            volumeAnterior =
+                audio.volume || 1;
+
+            audio.muted = true;
+
+            barraVolume.value = 0;
 
         }
+
+
+        atualizarIconeVolume();
+
+    }
+);
+
+
+function atualizarIconeVolume() {
+
+    if (
+        audio.muted ||
+        audio.volume === 0
+    ) {
+
+        volumeIcon.className =
+            'fa-solid fa-volume-xmark';
+
+        btnMute.setAttribute(
+            'aria-label',
+            'Ativar som'
+        );
+
+        btnMute.setAttribute(
+            'title',
+            'Ativar som'
+        );
+
+        return;
+
+    }
+
+
+    if (audio.volume < 0.5) {
+
+        volumeIcon.className =
+            'fa-solid fa-volume-low';
+
+    } else {
+
+        volumeIcon.className =
+            'fa-solid fa-volume-high';
+
+    }
+
+
+    btnMute.setAttribute(
+        'aria-label',
+        'Silenciar'
+    );
+
+    btnMute.setAttribute(
+        'title',
+        'Silenciar'
+    );
+
+}
+
+
+// ========================================================
+// CURTIR — VISUAL POR ENQUANTO
+// ========================================================
+
+// ========================================================
+// CURTIDA
+// ========================================================
+
+const btnCurtir =
+    document.getElementById(
+        'btnCurtir'
     );
 
 
-// ==========================================
+async function verificarCurtida() {
+
+    try {
+
+        const resposta =
+            await fetch(
+               `http://localhost:3000/curtidas/${idMusicaAtual}`,
+                {
+                    headers: {
+                        'Authorization':
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        if (resposta.status === 401) {
+
+            localStorage.removeItem(
+                'token'
+            );
+
+            localStorage.removeItem(
+                'usuarioLogado'
+            );
+
+            window.location.href =
+                'login.html';
+
+            return;
+
+        }
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                'Erro ao verificar curtida.'
+            );
+
+        }
+
+
+        const dados =
+            await resposta.json();
+
+
+        atualizarBotaoCurtida(
+            dados.curtida
+        );
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao verificar curtida:',
+            erro
+        );
+
+    }
+
+}
+
+
+function atualizarBotaoCurtida(
+    curtida
+) {
+
+    btnCurtir.classList.toggle(
+        'liked',
+        curtida
+    );
+
+
+    if (curtida) {
+
+        btnCurtir.innerHTML = `
+            <i class="fa-solid fa-heart"></i>
+            Curtido
+        `;
+
+    } else {
+
+        btnCurtir.innerHTML = `
+            <i class="fa-regular fa-heart"></i>
+            Curtir
+        `;
+
+    }
+
+}
+
+
+async function alterarCurtida() {
+
+    const estaCurtido =
+        btnCurtir.classList.contains(
+            'liked'
+        );
+
+
+    btnCurtir.disabled = true;
+
+
+    try {
+
+        const resposta =
+            await fetch(
+               `http://localhost:3000/curtidas/${idMusicaAtual}`,
+                {
+                    method:
+                        estaCurtido
+                            ? 'DELETE'
+                            : 'POST',
+
+                    headers: {
+                        'Authorization':
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+
+        if (resposta.status === 401) {
+
+            localStorage.removeItem(
+                'token'
+            );
+
+            localStorage.removeItem(
+                'usuarioLogado'
+            );
+
+            window.location.href =
+                'login.html';
+
+            return;
+
+        }
+
+
+        const dados =
+            await resposta.json();
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                dados.erro ||
+                'Erro ao alterar curtida.'
+            );
+
+        }
+
+
+        atualizarBotaoCurtida(
+            !estaCurtido
+        );
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao alterar curtida:',
+            erro
+        );
+
+    } finally {
+
+        btnCurtir.disabled =
+            false;
+
+    }
+
+}
+
+
+btnCurtir.addEventListener(
+    'click',
+    alterarCurtida
+);
+
+
+// ========================================================
 // INICIALIZAÇÃO
-// ==========================================
+// ========================================================
 
 document.addEventListener(
     'DOMContentLoaded',
-    carregarDetalhesMusica
+    carregarMusicas
 );
 
 </script>
 
+<script src="js/header.js"></script>
+
 </body>
+
 </html>

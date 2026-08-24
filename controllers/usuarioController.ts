@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
-import Usuario from '../models/usuarioModel'; // Alterado de require para import!
+import { AuthRequest } from '../types/auth';
+import Usuario from '../models/usuarioModel';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -109,6 +110,139 @@ const usuarioController = {
 
     },
 
+
+    perfil: async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        try {
+
+            const id =
+                req.usuario!.id;
+
+
+            const [usuario, totalComentarios] =
+                await Promise.all([
+                    Usuario.buscarPorId(id),
+                    Usuario.contarComentarios(id)
+                ]);
+
+
+            if (!usuario) {
+
+                return res.status(404).json({
+                    erro: 'Usuário não encontrado'
+                });
+
+            }
+
+
+            return res.json({
+                id: usuario.id_usuario,
+                nome: usuario.nome,
+                email: usuario.email,
+                totalComentarios
+            });
+
+        } catch (err) {
+
+            console.error(
+                'Erro ao buscar perfil:',
+                err
+            );
+
+            return res.status(500).json({
+                erro: 'Erro ao buscar perfil'
+            });
+
+        }
+    },
+
+    atualizarPerfil: async (
+        req: AuthRequest,
+        res: Response
+    ) => {
+
+        try {
+
+            const id =
+                req.usuario!.id;
+
+            const {
+                nome,
+                email,
+                senha
+            } = req.body;
+
+
+            if (!nome || !email) {
+
+                return res.status(400).json({
+                    erro: 'Nome e e-mail são obrigatórios'
+                });
+
+            }
+
+
+            if (
+                senha &&
+                senha.length < 6
+            ) {
+
+                return res.status(400).json({
+                    erro: 'A senha deve possuir pelo menos 6 caracteres'
+                });
+
+            }
+
+
+            const senhaHash =
+                senha
+                    ? await bcrypt.hash(
+                        senha,
+                        12
+                    )
+                    : undefined;
+
+
+            await Usuario.atualizar(
+                id,
+                nome,
+                email,
+                senhaHash
+            );
+
+
+            return res.json({
+                mensagem: 'Perfil atualizado com sucesso'
+            });
+
+        } catch (err: any) {
+
+            console.error(
+                'Erro ao atualizar perfil:',
+                err
+            );
+
+
+            if (err.code === 'P2002') {
+
+                return res.status(400).json({
+                    erro: 'Email já cadastrado'
+                });
+
+            }
+
+
+            return res.status(500).json({
+                erro: 'Erro ao atualizar perfil'
+            });
+
+        }
+
+    },
+
     listarUsuarios: async (req: Request, res: Response) => {
 
         try {
@@ -172,5 +306,8 @@ const usuarioController = {
 
     },
 };
+
+
+
 
 export default usuarioController;

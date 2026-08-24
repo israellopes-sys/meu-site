@@ -27,6 +27,8 @@
 
 <body>
 
+    <div id="global-header"></div>
+
     <main class="home-page">
 
 
@@ -49,49 +51,134 @@
 
             </div>
 
-
-            <button
-                id="btnLogout"
-                class="home-logout"
-                type="button"
-            >
-
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-
-                Sair
-
-            </button>
-
         </header>
 
 
-        <!-- APRESENTAÇÃO -->
+        <!-- BOAS-VINDAS -->
 
         <section class="home-welcome">
 
-            <div>
+            <span class="home-section-label">
+                SUA EXPERIÊNCIA
+            </span>
 
-                <span class="home-section-label">
-                    SUA EXPERIÊNCIA
-                </span>
+            <h2 id="usuario-logado">
+                Olá!
+            </h2>
 
-                <h2 id="usuario-logado">
-                    Olá!
-                </h2>
+            <p>
+                Explore músicas, conheça artistas
+                e compartilhe o que você está ouvindo.
+            </p>
 
-                <p>
-                    Explore músicas, conheça artistas
-                    e compartilhe o que você está ouvindo.
-                </p>
+        </section>
+
+
+        <!-- BUSCA -->
+
+        <section class="home-search">
+
+            <div class="home-search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    id="campoBusca"
+                    type="search"
+                    placeholder="Buscar por música ou artista..."
+                    autocomplete="off"
+                >
+
+                <button
+                    id="btnLimparBusca"
+                    type="button"
+                    aria-label="Limpar busca"
+                >
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
 
             </div>
 
         </section>
 
 
-        <!-- MÚSICAS -->
+        <!-- RECENTES -->
 
-        <section class="home-music-section">
+        <section
+            id="secao-recentes"
+            class="home-recent-section"
+        >
+
+            <div class="home-section-header">
+
+                <div>
+
+                    <span class="home-section-label">
+                        CONTINUE OUVINDO
+                    </span>
+
+                    <h2>
+                        Ouvidas recentemente
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="lista-recentes"
+                class="music-grid music-grid-recentes"
+            >
+
+            </div>
+
+        </section>
+
+
+        <section
+            id="secao-favoritas"
+            class="home-favorites-section"
+        >
+
+            <div class="home-section-header">
+
+                <div>
+                    <span class="home-section-label">
+                        SUA COLEÇÃO
+                    </span>
+
+                    <h2>
+                        Minhas favoritas
+                    </h2>
+                </div>
+
+                <span
+                    id="contador-favoritas"
+                    class="home-count"
+                >
+                    0 músicas
+                </span>
+
+            </div>
+
+
+            <div
+                id="lista-favoritas"
+                class="music-grid music-grid-favoritas"
+            >
+
+            </div>
+
+        </section>
+
+
+        <!-- TODAS AS MÚSICAS -->
+
+        <section
+            id="colecao"
+            class="home-music-section"
+        >
 
             <div class="home-section-header">
 
@@ -171,25 +258,20 @@
 <script>
 
 
-// ==========================================
+// ========================================================
 // AUTENTICAÇÃO
-// ==========================================
+// ========================================================
 
 const dadosLogin =
-    localStorage.getItem(
-        'usuarioLogado'
-    );
+    localStorage.getItem('usuarioLogado');
 
 const token =
-    localStorage.getItem(
-        'token'
-    );
+    localStorage.getItem('token');
 
 
 if (!dadosLogin || !token) {
 
-    window.location.href =
-        'login.html';
+    window.location.href = 'login.html';
 
 }
 
@@ -199,9 +281,7 @@ let usuario;
 try {
 
     usuario =
-        JSON.parse(
-            dadosLogin
-        );
+        JSON.parse(dadosLogin);
 
 } catch (erro) {
 
@@ -210,29 +290,75 @@ try {
         erro
     );
 
-    localStorage.removeItem(
-        'usuarioLogado'
-    );
+    localStorage.removeItem('usuarioLogado');
+    localStorage.removeItem('token');
 
-    localStorage.removeItem(
-        'token'
-    );
-
-    window.location.href =
-        'login.html';
+    window.location.href = 'login.html';
 
 }
 
 
-// ==========================================
-// IDENTIFICAÇÃO DO USUÁRIO
-// ==========================================
+// ========================================================
+// ELEMENTOS
+// ========================================================
 
 const elementoUsuario =
     document.getElementById(
         'usuario-logado'
     );
 
+const listaMusicas =
+    document.getElementById(
+        'lista-musicas'
+    );
+
+const listaRecentes =
+    document.getElementById(
+        'lista-recentes'
+    );
+
+const secaoRecentes =
+    document.getElementById(
+        'secao-recentes'
+    );
+
+const contadorMusicas =
+    document.getElementById(
+        'contador-musicas'
+    );
+
+const listaFavoritas =
+    document.getElementById(
+        'lista-favoritas'
+    );
+
+const secaoFavoritas =
+    document.getElementById(
+        'secao-favoritas'
+    );
+
+const contadorFavoritas =
+    document.getElementById(
+        'contador-favoritas'
+    );
+
+const campoBusca =
+    document.getElementById(
+        'campoBusca'
+    );
+
+const btnLimparBusca =
+    document.getElementById(
+        'btnLimparBusca'
+    );
+
+
+let todasAsMusicas = [];
+
+
+// ========================================================
+// USUÁRIO
+// ========================================================
 
 if (elementoUsuario && usuario) {
 
@@ -242,42 +368,529 @@ if (elementoUsuario && usuario) {
 }
 
 
-// ==========================================
-// LOGOUT
-// ==========================================
 
-document
-    .getElementById('btnLogout')
-    .addEventListener(
-        'click',
-        () => {
+// ========================================================
+// HISTÓRICO
+// ========================================================
 
-            localStorage.removeItem(
-                'usuarioLogado'
+function obterRecentes() {
+
+    try {
+
+        const dados =
+            localStorage.getItem(
+                'musicasRecentes'
             );
 
-            localStorage.removeItem(
-                'token'
+        if (!dados) {
+            return [];
+        }
+
+        const recentes =
+            JSON.parse(dados);
+
+        if (!Array.isArray(recentes)) {
+            return [];
+        }
+
+        return recentes;
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao ler histórico:',
+            erro
+        );
+
+        return [];
+
+    }
+
+}
+
+
+function salvarMusicaRecente(musica) {
+
+    try {
+
+        let recentes =
+            obterRecentes();
+
+
+        const registro = {
+
+            id_musica:
+                musica.id_musica,
+
+            titulo:
+                musica.titulo,
+
+            artista:
+                musica.artista,
+
+            capa:
+                musica.capa || null,
+
+            data:
+                Date.now()
+
+        };
+
+
+        recentes =
+            recentes.filter(
+                item =>
+                    item.id_musica !==
+                    musica.id_musica
             );
+
+
+        recentes.unshift(
+            registro
+        );
+
+
+        recentes =
+            recentes.slice(0, 5);
+
+
+        localStorage.setItem(
+            'musicasRecentes',
+            JSON.stringify(
+                recentes
+            )
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao salvar música recente:',
+            erro
+        );
+
+    }
+
+}
+
+
+// ========================================================
+// CARD DE MÚSICA
+// ========================================================
+
+function criarCardMusica(
+    musica,
+    modo = 'normal'
+) {
+
+    const capa =
+        musica.capa
+            ? `
+                <img
+                    src="${musica.capa}"
+                    alt="Capa de ${musica.titulo}"
+                    class="music-card-cover"
+                >
+            `
+            : `
+                <div class="music-card-placeholder">
+                    <i class="fa-solid fa-music"></i>
+                </div>
+            `;
+
+    const classeExtra =
+        modo === 'recente'
+            ? ' music-card-recent'
+            : '';
+
+    const coracao =
+        modo === 'favorita'
+            ? `
+                <span
+                    class="favorite-card-heart"
+                    aria-label="Música favorita"
+                >
+                    <i class="fa-solid fa-heart"></i>
+                </span>
+            `
+            : '';
+
+    return `
+        <a
+            href="musica.html?id=${musica.id_musica}"
+            class="music-card-link"
+            data-id="${musica.id_musica}"
+        >
+
+            <article
+                class="music-card${classeExtra}"
+            >
+
+                <div class="music-card-cover-wrapper">
+
+                    ${capa}
+
+                    ${coracao}
+
+                    <div class="music-card-play">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+
+                </div>
+
+                <div class="music-card-content">
+
+                    <h3>
+                        ${musica.titulo}
+                    </h3>
+
+                    <p>
+                        ${musica.artista}
+                    </p>
+
+                </div>
+
+            </article>
+
+        </a>
+    `;
+}
+
+
+// ========================================================
+// RENDERIZAR RECENTES
+// ========================================================
+
+function renderizarRecentes() {
+
+    const recentes =
+        obterRecentes();
+
+
+    if (!recentes.length) {
+
+        secaoRecentes.style.display =
+            'none';
+
+        return;
+
+    }
+
+
+    secaoRecentes.style.display =
+        'block';
+
+
+    listaRecentes.innerHTML =
+        recentes
+            .map(
+                musica =>
+                    criarCardMusica(
+                        musica,
+                        'recente'
+                    )
+            )
+            .join('');
+
+
+    adicionarEventosHistorico(
+        listaRecentes
+    );
+
+}
+
+
+async function carregarFavoritas() {
+
+    try {
+
+        const resposta =
+            await fetch(
+                'http://localhost:3000/curtidas',
+                {
+                    headers: {
+                        'Authorization':
+                            `Bearer ${token}`
+                    }
+                }
+            );
+
+        if (resposta.status === 401) {
+
+            localStorage.removeItem('token');
+            localStorage.removeItem('usuarioLogado');
 
             window.location.href =
                 'login.html';
 
+            return;
         }
-    );
 
+        if (!resposta.ok) {
 
-// ==========================================
-// CARREGAR MÚSICAS
-// ==========================================
+            throw new Error(
+                'Erro ao buscar favoritas.'
+            );
 
-async function carregarMusicas() {
+        }
 
-    const lista =
-        document.getElementById(
-            'lista-musicas'
+        const curtidas =
+            await resposta.json();
+
+        const favoritas =
+            curtidas
+                .map(item => item.musica)
+                .filter(Boolean);
+
+        contadorFavoritas.textContent =
+            `${favoritas.length} ${
+                favoritas.length === 1
+                    ? 'música'
+                    : 'músicas'
+            }`;
+
+        if (!favoritas.length) {
+
+            secaoFavoritas.style.display =
+                'none';
+
+            return;
+        }
+
+        secaoFavoritas.style.display =
+            'block';
+
+        listaFavoritas.innerHTML =
+            favoritas
+                .map(
+                    musica =>
+                        criarCardMusica(
+                            musica,
+                            'favorita'
+                        )
+                )
+                .join('');
+
+        adicionarEventosHistorico(
+            listaFavoritas
         );
 
+    } catch (erro) {
+
+        console.error(
+            'Erro ao carregar favoritas:',
+            erro
+        );
+
+        secaoFavoritas.style.display =
+            'none';
+
+    }
+
+}
+
+// ========================================================
+// REGISTRAR CLIQUE
+// ========================================================
+
+function adicionarEventosHistorico(
+    container
+) {
+
+    container
+        .querySelectorAll(
+            '.music-card-link'
+        )
+        .forEach(
+            link => {
+
+                link.addEventListener(
+                    'click',
+                    () => {
+
+                        const id =
+                            Number(
+                                link.dataset.id
+                            );
+
+
+                        const musica =
+                            todasAsMusicas.find(
+                                item =>
+                                    Number(
+                                        item.id_musica
+                                    ) === id
+                            );
+
+
+                        if (musica) {
+
+                            salvarMusicaRecente(
+                                musica
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+// ========================================================
+// RENDERIZAR MÚSICAS
+// ========================================================
+
+function renderizarMusicas(
+    musicas
+) {
+
+    contadorMusicas.textContent =
+        `${musicas.length} ${
+            musicas.length === 1
+                ? 'música'
+                : 'músicas'
+        }`;
+
+
+    if (!musicas.length) {
+
+        listaMusicas.innerHTML = `
+
+            <div class="home-empty">
+
+                <div class="home-empty-icon">
+
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                </div>
+
+                <h3>
+                    Nenhuma música encontrada
+                </h3>
+
+                <p>
+                    Tente buscar por outro nome
+                    de música ou artista.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    listaMusicas.innerHTML =
+        musicas
+            .map(
+                musica =>
+                    criarCardMusica(
+                        musica
+                    )
+            )
+            .join('');
+
+
+    adicionarEventosHistorico(
+        listaMusicas
+    );
+
+}
+
+
+// ========================================================
+// BUSCA
+// ========================================================
+
+function executarBusca() {
+
+    const termo =
+        campoBusca.value
+            .trim()
+            .toLowerCase();
+
+
+    btnLimparBusca.style.display =
+        termo
+            ? 'flex'
+            : 'none';
+
+
+    if (!termo) {
+
+        renderizarMusicas(
+            todasAsMusicas
+        );
+
+        return;
+
+    }
+
+
+    const resultados =
+        todasAsMusicas.filter(
+            musica => {
+
+                const titulo =
+                    String(
+                        musica.titulo || ''
+                    )
+                    .toLowerCase();
+
+                const artista =
+                    String(
+                        musica.artista || ''
+                    )
+                    .toLowerCase();
+
+
+                return (
+                    titulo.includes(termo) ||
+                    artista.includes(termo)
+                );
+
+            }
+        );
+
+
+    renderizarMusicas(
+        resultados
+    );
+
+}
+
+
+campoBusca.addEventListener(
+    'input',
+    executarBusca
+);
+
+
+btnLimparBusca.addEventListener(
+    'click',
+    () => {
+
+        campoBusca.value = '';
+
+        executarBusca();
+
+        campoBusca.focus();
+
+    }
+);
+
+
+// ========================================================
+// CARREGAR MÚSICAS
+// ========================================================
+
+async function carregarMusicas() {
 
     try {
 
@@ -296,122 +909,17 @@ async function carregarMusicas() {
         }
 
 
-        const musicas =
+        todasAsMusicas =
             await resposta.json();
 
 
-        lista.innerHTML = '';
-
-
-        document
-            .getElementById(
-                'contador-musicas'
-            )
-            .textContent =
-            `${musicas.length} ${
-                musicas.length === 1
-                    ? 'música'
-                    : 'músicas'
-            }`;
-
-
-        // Nenhuma música
-
-        if (musicas.length === 0) {
-
-            lista.innerHTML = `
-
-                <div class="home-empty">
-
-                    <div class="home-empty-icon">
-
-                        <i class="fa-solid fa-music"></i>
-
-                    </div>
-
-                    <h3>
-                        Nenhuma música encontrada
-                    </h3>
-
-                    <p>
-                        Ainda não há músicas cadastradas
-                        na coleção.
-                    </p>
-
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-        // Renderizar músicas
-
-        musicas.forEach(
-            (musica) => {
-
-                const capa =
-                    musica.capa
-                        ? `
-                            <img
-                                src="${musica.capa}"
-                                alt="Capa de ${musica.titulo}"
-                                class="music-card-cover"
-                            >
-                        `
-                        : `
-                            <div class="music-card-placeholder">
-
-                                <i class="fa-solid fa-music"></i>
-
-                            </div>
-                        `;
-
-
-                lista.innerHTML += `
-
-                    <a
-                        href="musica.html?id=${musica.id_musica}"
-                        class="music-card-link"
-                    >
-
-                        <article class="music-card">
-
-                            <div class="music-card-cover-wrapper">
-
-                                ${capa}
-
-                                <div class="music-card-play">
-
-                                    <i class="fa-solid fa-play"></i>
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="music-card-content">
-
-                                <h3>
-                                    ${musica.titulo}
-                                </h3>
-
-                                <p>
-                                    ${musica.artista}
-                                </p>
-
-                            </div>
-
-                        </article>
-
-                    </a>
-
-                `;
-
-            }
+        renderizarMusicas(
+            todasAsMusicas
         );
+
+        renderizarRecentes();
+
+        carregarFavoritas();
 
 
     } catch (erro) {
@@ -422,7 +930,7 @@ async function carregarMusicas() {
         );
 
 
-        lista.innerHTML = `
+        listaMusicas.innerHTML = `
 
             <div class="home-error">
 
@@ -441,9 +949,9 @@ async function carregarMusicas() {
 }
 
 
-// ==========================================
+// ========================================================
 // INICIALIZAÇÃO
-// ==========================================
+// ========================================================
 
 document.addEventListener(
     'DOMContentLoaded',
@@ -451,6 +959,8 @@ document.addEventListener(
 );
 
 </script>
+
+<script src="js/header.js"></script>
 
 </body>
 

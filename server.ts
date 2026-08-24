@@ -6,6 +6,8 @@ import morgan from 'morgan';
 import usuarioRoutes from './routes/usuarioRoutes';
 import comentarioRoutes from './routes/comentarioRoutes';
 import musicaRoutes from './routes/musicaRoutes';
+import curtidaRoutes from './routes/curtidaRoutes';
+
 
 const app: Express = express();
 
@@ -21,6 +23,7 @@ app.use(express.static('public'));
 app.use(usuarioRoutes);
 app.use(musicaRoutes);
 app.use(comentarioRoutes);
+app.use(curtidaRoutes);
 
 // Ligando o servidor na porta 3000
 app.use((req, res, next) => {

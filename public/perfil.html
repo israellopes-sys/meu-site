@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Meu perfil - MPB Interativa</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+</head>
+
+
+<body>
+
+    <div id="global-header"></div>
+
+
+    <main class="profile-page">
+
+        <a
+            href="home.html"
+            class="profile-back"
+        >
+            <i class="fa-solid fa-arrow-left"></i>
+            Voltar para início
+        </a>
+
+
+        <!-- CABEÇALHO DO PERFIL -->
+
+        <section class="profile-hero">
+
+            <div class="profile-avatar">
+
+                <i class="fa-solid fa-user"></i>
+
+            </div>
+
+
+            <div class="profile-hero-info">
+
+                <span class="profile-label">
+                    MINHA CONTA
+                </span>
+
+                <h1 id="perfil-nome">
+                    Carregando...
+                </h1>
+
+                <p id="perfil-email">
+                    Carregando...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ESTATÍSTICAS -->
+
+        <section class="profile-stats">
+
+            <div class="profile-stat">
+
+                <span class="profile-stat-icon favorite">
+                    <i class="fa-solid fa-heart"></i>
+                </span>
+
+                <div>
+
+                    <strong id="total-favoritas">
+                        0
+                    </strong>
+
+                    <span>
+                        Favoritas
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="profile-stat">
+
+                <span class="profile-stat-icon comment">
+                    <i class="fa-solid fa-comment"></i>
+                </span>
+
+                <div>
+
+                    <strong id="total-comentarios">
+                        —
+                    </strong>
+
+                    <span>
+                        Comentários
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- EDIÇÃO -->
+
+        <section class="profile-edit-card">
+
+            <div class="profile-section-heading">
+
+                <div>
+
+                    <span class="profile-label">
+                        CONFIGURAÇÕES
+                    </span>
+
+                    <h2>
+                        Editar perfil
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <form id="perfil-form">
+
+                <div class="profile-form-grid">
+
+                    <div class="profile-form-group">
+
+                        <label for="nome">
+                            Nome
+                        </label>
+
+                        <input
+                            id="nome"
+                            type="text"
+                            autocomplete="name"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="profile-form-group">
+
+                        <label for="email">
+                            E-mail
+                        </label>
+
+                        <input
+                            id="email"
+                            type="email"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="profile-form-group full">
+
+                        <label for="senha">
+                            Nova senha
+                            <span>
+                                Deixe em branco para manter a atual.
+                            </span>
+                        </label>
+
+                        <input
+                            id="senha"
+                            type="password"
+                            autocomplete="new-password"
+                            minlength="6"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="perfil-mensagem"
+                    class="profile-message"
+                ></div>
+
+
+                <div class="profile-form-footer">
+
+                    <button
+                        id="btnSalvarPerfil"
+                        class="btn-primary"
+                        type="submit"
+                    >
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+
+                        Salvar alterações
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/header.js"></script>
+
+
+    <script>
+
+    // ========================================================
+    // AUTENTICAÇÃO
+    // ========================================================
+
+    const token =
+        localStorage.getItem('token');
+
+    const usuarioRaw =
+        localStorage.getItem('usuarioLogado');
+
+
+    if (!token || !usuarioRaw) {
+
+        window.location.href =
+            'login.html';
+
+    }
+
+
+    // ========================================================
+    // ELEMENTOS
+    // ========================================================
+
+    const nomePerfil =
+        document.getElementById(
+            'perfil-nome'
+        );
+
+    const emailPerfil =
+        document.getElementById(
+            'perfil-email'
+        );
+
+    const nomeInput =
+        document.getElementById(
+            'nome'
+        );
+
+    const emailInput =
+        document.getElementById(
+            'email'
+        );
+
+    const senhaInput =
+        document.getElementById(
+            'senha'
+        );
+
+    const mensagem =
+        document.getElementById(
+            'perfil-mensagem'
+        );
+
+    const btnSalvar =
+        document.getElementById(
+            'btnSalvarPerfil'
+        );
+
+
+    // ========================================================
+    // MENSAGEM
+    // ========================================================
+
+    function mostrarMensagem(
+        texto,
+        tipo
+    ) {
+
+        mensagem.textContent =
+            texto;
+
+        mensagem.className =
+            `profile-message ${tipo}`;
+
+    }
+
+
+    // ========================================================
+    // CARREGAR PERFIL
+    // ========================================================
+
+    async function carregarPerfil() {
+
+        try {
+
+            const resposta =
+                await fetch(
+                    'http://localhost:3000/usuarios/me',
+                    {
+                        headers: {
+                            'Authorization':
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+            if (resposta.status === 401) {
+
+                localStorage.removeItem(
+                    'token'
+                );
+
+                localStorage.removeItem(
+                    'usuarioLogado'
+                );
+
+                window.location.href =
+                    'login.html';
+
+                return;
+
+            }
+
+
+            const dados =
+                await resposta.json();
+
+
+            if (!resposta.ok) {
+
+                throw new Error(
+                    dados.erro ||
+                    'Não foi possível carregar o perfil.'
+                );
+
+            }
+
+
+            nomePerfil.textContent =
+                dados.nome;
+
+            emailPerfil.textContent =
+                dados.email;
+
+            
+            document.getElementById(
+                'total-comentarios'
+            ).textContent =
+                dados.totalComentarios;
+
+
+            nomeInput.value =
+                dados.nome;
+
+            emailInput.value =
+                dados.email;
+
+
+            atualizarUsuarioLocal(
+                dados
+            );
+
+
+        } catch (erro) {
+
+            console.error(
+                'Erro ao carregar perfil:',
+                erro
+            );
+
+            mostrarMensagem(
+                erro.message,
+                'error'
+            );
+
+        }
+
+    }
+
+
+    // ========================================================
+    // FAVORITAS
+    // ========================================================
+
+    async function carregarFavoritas() {
+
+        try {
+
+            const resposta =
+                await fetch(
+                    'http://localhost:3000/curtidas',
+                    {
+                        headers: {
+                            'Authorization':
+                                `Bearer ${token}`
+                        }
+                    }
+                );
+
+
+            if (!resposta.ok) {
+                return;
+            }
+
+
+            const favoritas =
+                await resposta.json();
+
+
+            document
+                .getElementById(
+                    'total-favoritas'
+                )
+                .textContent =
+                    favoritas.length;
+
+        } catch (erro) {
+
+            console.error(
+                'Erro ao carregar favoritas:',
+                erro
+            );
+
+        }
+
+    }
+
+
+    // ========================================================
+    // ATUALIZAR STORAGE
+    // ========================================================
+
+    function atualizarUsuarioLocal(
+        usuario
+    ) {
+
+        localStorage.setItem(
+            'usuarioLogado',
+            JSON.stringify({
+                id: usuario.id,
+                nome: usuario.nome,
+                email: usuario.email
+            })
+        );
+
+    }
+
+
+    // ========================================================
+    // SALVAR
+    // ========================================================
+
+    document
+        .getElementById(
+            'perfil-form'
+        )
+        .addEventListener(
+            'submit',
+            async event => {
+
+                event.preventDefault();
+
+
+                const nome =
+                    nomeInput.value.trim();
+
+                const email =
+                    emailInput.value.trim();
+
+                const senha =
+                    senhaInput.value.trim();
+
+
+                if (!nome || !email) {
+
+                    mostrarMensagem(
+                        'Preencha nome e e-mail.',
+                        'error'
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    senha &&
+                    senha.length < 6
+                ) {
+
+                    mostrarMensagem(
+                        'A nova senha deve possuir pelo menos 6 caracteres.',
+                        'error'
+                    );
+
+                    return;
+
+                }
+
+
+                btnSalvar.disabled =
+                    true;
+
+
+                btnSalvar.innerHTML = `
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Salvando...
+                `;
+
+
+                try {
+
+                    const corpo = {
+                        nome,
+                        email
+                    };
+
+
+                    if (senha) {
+                        corpo.senha =
+                            senha;
+                    }
+
+
+                    const resposta =
+                        await fetch(
+                            'http://localhost:3000/usuarios/me',
+                            {
+                                method:
+                                    'PUT',
+
+                                headers: {
+                                    'Authorization':
+                                        `Bearer ${token}`,
+
+                                    'Content-Type':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        corpo
+                                    )
+                            }
+                        );
+
+
+                    const dados =
+                        await resposta.json();
+
+
+                    if (resposta.status === 401) {
+
+                        localStorage.removeItem(
+                            'token'
+                        );
+
+                        localStorage.removeItem(
+                            'usuarioLogado'
+                        );
+
+                        window.location.href =
+                            'login.html';
+
+                        return;
+
+                    }
+
+
+                    if (!resposta.ok) {
+
+                        throw new Error(
+                            dados.erro ||
+                            'Erro ao atualizar perfil.'
+                        );
+
+                    }
+
+
+                    const usuarioAtualizado = {
+                        nome,
+                        email
+                    };
+
+
+                    atualizarUsuarioLocal(
+                        {
+                            id:
+                                JSON.parse(
+                                    localStorage.getItem(
+                                        'usuarioLogado'
+                                    )
+                                ).id,
+
+                            ...usuarioAtualizado
+                        }
+                    );
+
+
+                    nomePerfil.textContent =
+                        nome;
+
+                    emailPerfil.textContent =
+                        email;
+
+
+                    senhaInput.value =
+                        '';
+
+
+                    mostrarMensagem(
+                        'Perfil atualizado com sucesso.',
+                        'success'
+                    );
+
+
+                } catch (erro) {
+
+                    console.error(
+                        'Erro ao atualizar perfil:',
+                        erro
+                    );
+
+                    mostrarMensagem(
+                        erro.message,
+                        'error'
+                    );
+
+                } finally {
+
+                    btnSalvar.disabled =
+                        false;
+
+                    btnSalvar.innerHTML = `
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Salvar alterações
+                    `;
+
+                }
+
+            }
+        );
+
+
+    // ========================================================
+    // INICIALIZAÇÃO
+    // ========================================================
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+
+            carregarPerfil();
+
+            carregarFavoritas();
+
+        }
+    );
+
+    </script>
+
+</body>
+
+</html>

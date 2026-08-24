@@ -22,6 +22,18 @@ router.get(
     usuarioController.listarUsuarios
 );
 
+router.get(
+    '/usuarios/me',
+    authMiddleware,
+    usuarioController.perfil
+);
+
+router.put(
+    '/usuarios/me',
+    authMiddleware,
+    usuarioController.atualizarPerfil
+);
+
 router.put(
     '/usuarios/:id',
     authMiddleware,
@@ -33,5 +45,10 @@ router.delete(
     authMiddleware,
     usuarioController.removerUsuario
 );
+
+
+
+
+
 
 export default router;

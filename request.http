@@ -14,8 +14,8 @@ POST {{baseUrl}}/usuarios
 Content-Type: application/json
 
 {
-"nome": "Usuario Teste API",
-"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"nome": "T1",
+"email": "T1@gmail.com",
 "senha": "123456"
 }
 
@@ -66,7 +66,7 @@ POST {{baseUrl}}/login
 Content-Type: application/json
 
 {
-"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"email": "T1@gmail.com",
 "senha": "123456"
 }
 
@@ -207,6 +207,35 @@ DELETE {{baseUrl}}/usuarios/ID_DO_USUARIO
 
 DELETE {{baseUrl}}/usuarios/ID_DO_USUARIO
 Authorization: Bearer SEU_TOKEN_AQUI
+
+
+
+
+# ================================================================
+# CURTIDAS
+# ================================================================
+
+### Curtir música
+POST {{baseUrl}}/curtidas/40
+Authorization: Bearer SEU_TOKEN_AQUI
+
+
+### Verificar se curtiu
+GET {{baseUrl}}/curtidas/40
+Authorization: Bearer SEU_TOKEN_AQUI
+
+
+### Listar minhas músicas favoritas
+GET {{baseUrl}}/curtidas
+Authorization: Bearer SEU_TOKEN_AQUI
+
+
+### Descurtir música
+DELETE {{baseUrl}}/curtidas/40
+Authorization: Bearer SEU_TOKEN_AQUI
+
+
+
 
 # ================================================================
 
