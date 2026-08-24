@@ -85,11 +85,17 @@
             return res.json();
         })
         .then(data => {
-            // Se chegou aqui, deu sucesso! Guardamos os dados e vamos para a home
+
+            localStorage.setItem(
+                'token',
+                data.token
+            );
+
             localStorage.setItem(
                 'usuarioLogado',
-                JSON.stringify(data)
+                JSON.stringify(data.usuario)
             );
+
             window.location.href = 'home.html';
         })
         .catch(err => {

@@ -1,108 +1,587 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Player MPB</title>
+
+    <title>Música - MPB Interativa</title>
+
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
 </head>
+
 <body>
-    <div class="page-center">
 
-        <div class="player-card">
-            <div class="back-nav" onclick="window.location.href='home.html'">
-                <i class="fa-solid fa-arrow-left"></i> Sair
+    <main class="music-page">
+
+        <!-- NAVEGAÇÃO -->
+        <a href="home.html" class="music-back">
+            <i class="fa-solid fa-arrow-left"></i>
+            Voltar
+        </a>
+
+
+        <!-- PLAYER -->
+        <section class="music-player">
+
+            <!-- CAPA -->
+            <div class="music-cover" id="music-cover">
+
+                <img
+                    id="capa-musica"
+                    src=""
+                    alt="Capa da música"
+                >
+
+                <div
+                    id="capa-placeholder"
+                    class="music-cover-placeholder"
+                >
+                    <i class="fa-solid fa-music"></i>
+                </div>
+
             </div>
 
-            <div class="album-art">
-                <i class="fa-solid fa-compact-disc fa-spin fa-4x"></i>
+
+            <!-- INFORMAÇÕES -->
+            <div class="music-info">
+
+                <span class="music-label">
+                    MPB INTERATIVA
+                </span>
+
+                <h1 id="titulo">
+                    Carregando...
+                </h1>
+
+                <p id="artista">
+                    Carregando artista...
+                </p>
+
             </div>
 
-            <div class="song-title" id="titulo"></div>
 
-            <div class="artist-name" id="artista"></div>
+            <!-- PLAYER DE ÁUDIO -->
+            <div class="audio-section">
 
-            <div class="controls">
-                <button onclick="togglePlay()" class="btn-play">
-                    <i class="fa-solid fa-play" id="playIcon"></i>
+                <audio
+                    id="audioPlayer"
+                    preload="metadata"
+                ></audio>
+
+
+                <div class="audio-progress">
+
+                    <span id="tempoAtual">
+                        0:00
+                    </span>
+
+                    <input
+                        id="barraProgresso"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="0"
+                    >
+
+                    <span id="duracao">
+                        0:00
+                    </span>
+
+                </div>
+
+
+                <div class="audio-controls">
+
+                    <button
+                        id="btnPlay"
+                        class="btn-play"
+                        aria-label="Reproduzir"
+                    >
+                        <i
+                            id="playIcon"
+                            class="fa-solid fa-play"
+                        ></i>
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- AÇÕES -->
+            <div class="music-actions">
+
+                <button
+                    id="btnCurtir"
+                    class="pill-btn"
+                    type="button"
+                >
+                    <i class="fa-regular fa-heart"></i>
+                    Curtir
                 </button>
+
+
+                <a
+                    id="btnComentarios"
+                    class="pill-btn"
+                    href="#"
+                >
+                    <i class="fa-regular fa-comment"></i>
+                    Comentários
+                </a>
+
             </div>
 
-            <div class="action-buttons">
-                <button onclick="toggleLike(this)" class="pill-btn">
-                    <i class="fa-solid fa-heart"></i> Curtir
-                </button>
 
-            <button onclick="window.location.href='comentarios.html?id=' + window.idMusica" class="pill-btn">
-                    <i class="fa-solid fa-comment"></i> Comentários
-                </button>
-            </div>
-        </div>
-    </div>
+            <!-- USUÁRIO -->
+            <p
+                id="usuario-logado"
+                class="music-user"
+            ></p>
+
+        </section>
+
+    </main>
+
 
 <script>
-// Captura os parâmetros da URL para saber qual música carregar
-const params = new URLSearchParams(window.location.search);
-window.idMusica = params.get('id');
 
-// Se não houver ID na URL, volta para a home para não bugar o layout
-if (!window.idMusica) {
-    alert("Nenhuma música foi selecionada!");
-    window.location.href = 'home.html';
+// ==========================================
+// AUTENTICAÇÃO
+// ==========================================
+
+const token = localStorage.getItem('token');
+const usuarioRaw = localStorage.getItem('usuarioLogado');
+
+if (!token || !usuarioRaw) {
+
+    window.location.href = 'login.html';
+
 }
 
-// 1. CARREGAR OS DADOS DA MÚSICA SELECIONADA (READ)
+let usuario = null;
+
+try {
+
+    usuario = JSON.parse(usuarioRaw);
+
+} catch (err) {
+
+    console.error(
+        'Erro ao ler usuário:',
+        err
+    );
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuarioLogado');
+
+    window.location.href = 'login.html';
+
+}
+
+
+// ==========================================
+// ELEMENTOS
+// ==========================================
+
+const params =
+    new URLSearchParams(
+        window.location.search
+    );
+
+const idMusica =
+    params.get('id');
+
+
+const audio =
+    document.getElementById(
+        'audioPlayer'
+    );
+
+const btnPlay =
+    document.getElementById(
+        'btnPlay'
+    );
+
+const playIcon =
+    document.getElementById(
+        'playIcon'
+    );
+
+const barraProgresso =
+    document.getElementById(
+        'barraProgresso'
+    );
+
+const tempoAtual =
+    document.getElementById(
+        'tempoAtual'
+    );
+
+const duracao =
+    document.getElementById(
+        'duracao'
+    );
+
+
+// ==========================================
+// VALIDAR ID DA MÚSICA
+// ==========================================
+
+if (!idMusica) {
+
+    alert(
+        'Nenhuma música foi selecionada.'
+    );
+
+    window.location.href =
+        'home.html';
+
+}
+
+
+// ==========================================
+// EXIBIR USUÁRIO
+// ==========================================
+
+if (usuario) {
+
+    document.getElementById(
+        'usuario-logado'
+    ).textContent =
+        `Olá, ${usuario.nome} 👋`;
+
+}
+
+
+// ==========================================
+// FORMATAR TEMPO
+// ==========================================
+
+function formatarTempo(segundos) {
+
+    if (!Number.isFinite(segundos)) {
+        return '0:00';
+    }
+
+    const minutos =
+        Math.floor(segundos / 60);
+
+    const segundosRestantes =
+        Math.floor(segundos % 60);
+
+    return `${minutos}:${String(
+        segundosRestantes
+    ).padStart(2, '0')}`;
+
+}
+
+
+// ==========================================
+// CARREGAR MÚSICA
+// ==========================================
+
 async function carregarDetalhesMusica() {
+
     try {
-        const resposta = await fetch(`http://localhost:3000/musicas/${window.idMusica}`);
-        
+
+        const resposta =
+            await fetch(
+                `http://localhost:3000/musicas/${idMusica}`
+            );
+
+
         if (!resposta.ok) {
-            throw new Error("Música não encontrada no banco de dados.");
+
+            throw new Error(
+                'Música não encontrada.'
+            );
+
         }
-        
-        const musica = await resposta.json();
 
-        // Injeta os dados dinamicamente nas tags HTML
-        document.getElementById('titulo').textContent = musica.titulo;
-        document.getElementById('artista').textContent = musica.artista;
+
+        const musica =
+            await resposta.json();
+
+
+        document.title =
+            `${musica.titulo} - MPB Interativa`;
+
+
+        document.getElementById(
+            'titulo'
+        ).textContent =
+            musica.titulo;
+
+
+        document.getElementById(
+            'artista'
+        ).textContent =
+            musica.artista;
+
+
+        // ----------------------------------
+        // CAPA
+        // ----------------------------------
+
+        if (musica.capa) {
+
+            const capa =
+                document.getElementById(
+                    'capa-musica'
+                );
+
+            capa.src =
+                musica.capa;
+
+            capa.style.display =
+                'block';
+
+            document.getElementById(
+                'capa-placeholder'
+            ).style.display =
+                'none';
+
+        }
+
+
+        // ----------------------------------
+        // ÁUDIO
+        // ----------------------------------
+
+        if (musica.arquivo_audio) {
+
+            audio.src =
+                musica.arquivo_audio;
+
+        } else {
+
+            console.warn(
+                'Esta música não possui arquivo de áudio.'
+            );
+
+            btnPlay.disabled = true;
+
+        }
+
+
+        // ----------------------------------
+        // COMENTÁRIOS
+        // ----------------------------------
+
+        document.getElementById(
+            'btnComentarios'
+        ).href =
+            `comentarios.html?id=${idMusica}`;
+
+
     } catch (err) {
-        console.error("Erro ao buscar detalhes da música:", err);
-        document.getElementById('titulo').textContent = "Erro ao carregar";
-        document.getElementById('artista').textContent = "Música não encontrada";
+
+        console.error(
+            'Erro ao carregar música:',
+            err
+        );
+
+
+        document.getElementById(
+            'titulo'
+        ).textContent =
+            'Erro ao carregar';
+
+
+        document.getElementById(
+            'artista'
+        ).textContent =
+            'Música não encontrada';
+
     }
+
 }
 
-// Executa a função assim que a página termina de carregar
-document.addEventListener("DOMContentLoaded", carregarDetalhesMusica);
 
-// Funções auxiliares para os botões da interface (Player simulado/Front-end)
-let tocando = false;
-function togglePlay() {
-    tocando = !tocando;
-    const icone = document.getElementById('playIcon');
-    const disco = document.querySelector('.album-art i');
-    
-    if (tocando) {
-        icone.className = "fa-solid fa-pause";
-        disco.classList.add('fa-spin'); // Faz o disco girar
-    } else {
-        icone.className = "fa-solid fa-play";
-        disco.classList.remove('fa-spin'); // Pausa o giro do disco
-    }
-}
+// ==========================================
+// PLAY / PAUSE
+// ==========================================
 
-function toggleLike(botao) {
-    botao.classList.toggle('liked');
-    // Aqui você pode integrar com o fetch para a rota POST /curtidas no futuro se desejar!
-    if (botao.classList.contains('liked')) {
-        botao.innerHTML = '<i class="fa-solid fa-heart text-red-500"></i> Curtido';
-    } else {
-        botao.innerHTML = '<i class="fa-solid fa-heart"></i> Curtir';
+btnPlay.addEventListener(
+    'click',
+    async () => {
+
+        if (!audio.src) {
+            return;
+        }
+
+
+        if (audio.paused) {
+
+            await audio.play();
+
+        } else {
+
+            audio.pause();
+
+        }
+
     }
-}
+);
+
+
+// ==========================================
+// ATUALIZAR BOTÃO PLAY
+// ==========================================
+
+audio.addEventListener(
+    'play',
+    () => {
+
+        playIcon.className =
+            'fa-solid fa-pause';
+
+        btnPlay.setAttribute(
+            'aria-label',
+            'Pausar'
+        );
+
+    }
+);
+
+
+audio.addEventListener(
+    'pause',
+    () => {
+
+        playIcon.className =
+            'fa-solid fa-play';
+
+        btnPlay.setAttribute(
+            'aria-label',
+            'Reproduzir'
+        );
+
+    }
+);
+
+
+// ==========================================
+// DURAÇÃO
+// ==========================================
+
+audio.addEventListener(
+    'loadedmetadata',
+    () => {
+
+        duracao.textContent =
+            formatarTempo(
+                audio.duration
+            );
+
+    }
+);
+
+
+// ==========================================
+// PROGRESSO
+// ==========================================
+
+audio.addEventListener(
+    'timeupdate',
+    () => {
+
+        if (!audio.duration) {
+            return;
+        }
+
+
+        const progresso =
+            (audio.currentTime /
+                audio.duration) *
+            100;
+
+
+        barraProgresso.value =
+            progresso;
+
+
+        tempoAtual.textContent =
+            formatarTempo(
+                audio.currentTime
+            );
+
+    }
+);
+
+
+barraProgresso.addEventListener(
+    'input',
+    () => {
+
+        if (!audio.duration) {
+            return;
+        }
+
+
+        audio.currentTime =
+            (barraProgresso.value / 100) *
+            audio.duration;
+
+    }
+);
+
+
+// ==========================================
+// CURTIR — VISUAL POR ENQUANTO
+// ==========================================
+
+document
+    .getElementById('btnCurtir')
+    .addEventListener(
+        'click',
+        function () {
+
+            this.classList.toggle(
+                'liked'
+            );
+
+
+            if (
+                this.classList.contains(
+                    'liked'
+                )
+            ) {
+
+                this.innerHTML = `
+                    <i class="fa-solid fa-heart"></i>
+                    Curtido
+                `;
+
+            } else {
+
+                this.innerHTML = `
+                    <i class="fa-regular fa-heart"></i>
+                    Curtir
+                `;
+
+            }
+
+        }
+    );
+
+
+// ==========================================
+// INICIALIZAÇÃO
+// ==========================================
+
+document.addEventListener(
+    'DOMContentLoaded',
+    carregarDetalhesMusica
+);
+
 </script>
 
-<script src="js/script.js"></script>
 </body>
 </html>

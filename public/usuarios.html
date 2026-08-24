@@ -19,59 +19,80 @@
 
 </div>
 
-<script>
+<script type="module">
 
-async function carregarUsuarios(){
+import { requisicaoAutenticada } from './js/api.js';
 
-    const resposta = await fetch("http://localhost:3000/usuarios");
 
-    const usuarios = await resposta.json();
+async function carregarUsuarios() {
 
-    const lista = document.getElementById("lista-usuarios");
+    try {
 
-    lista.innerHTML = "";
+        const usuarios = await requisicaoAutenticada(
+            "http://localhost:3000/usuarios"
+        );
 
-    usuarios.forEach(usuario => {
+        if (!usuarios) return;
 
-        lista.innerHTML += `
-            <div class="topic-card topic-blue">
+        const lista = document.getElementById("lista-usuarios");
 
-                <h3>${usuario.nome}</h3>
+        lista.innerHTML = "";
 
-                <p>${usuario.email}</p>
+        usuarios.forEach(usuario => {
 
-                <button onclick="editarUsuario(${usuario.id_usuario})">
-                    ✏️ Editar
-                </button>
+            lista.innerHTML += `
+                <div class="topic-card topic-blue">
 
-                <button onclick="excluirUsuario(${usuario.id_usuario})">
-                    🗑️ Excluir
-                </button>
+                    <h3>${usuario.nome}</h3>
 
-            </div>
-        `;
+                    <p>${usuario.email}</p>
 
-    });
+                    <button onclick="editarUsuario(${usuario.id_usuario})">
+                        ✏️ Editar
+                    </button>
+
+                    <button onclick="excluirUsuario(${usuario.id_usuario})">
+                        🗑️ Excluir
+                    </button>
+
+                </div>
+            `;
+
+        });
+
+    } catch (erro) {
+
+        console.error("Erro ao carregar usuários:", erro);
+
+    }
 
 }
 
-async function excluirUsuario(id){
 
-    const confirmar = confirm("Deseja realmente excluir este usuário?");
+async function excluirUsuario(id) {
 
-    if(!confirmar) return;
+    const confirmar = confirm(
+        "Deseja realmente excluir este usuário?"
+    );
 
-    const resposta = await fetch(`http://localhost:3000/usuarios/${id}`,{
-        method:"DELETE"
-    });
+    if (!confirmar) return;
 
-    if(resposta.ok){
+    const resposta = await requisicaoAutenticada(
+        `http://localhost:3000/usuarios/${id}`,
+        {
+            method: "DELETE"
+        }
+    );
+
+    if (!resposta) return;
+
+    if (resposta.mensagem) {
 
         alert("Usuário removido com sucesso!");
 
         carregarUsuarios();
 
-    }else{
+    } else {
 
         alert("Erro ao remover usuário.");
 
@@ -80,49 +101,51 @@ async function excluirUsuario(id){
 }
 
 
-async function editarUsuario(id){
+async function editarUsuario(id) {
 
     const nome = prompt("Novo nome:");
 
-    if(nome == null) return;
+    if (nome == null) return;
 
     const email = prompt("Novo email:");
 
-    if(email == null) return;
+    if (email == null) return;
 
     const senha = prompt("Nova senha:");
 
-    if(senha == null) return;
+    if (senha == null) return;
 
-    const resposta = await fetch(`http://localhost:3000/usuarios/${id}`,{
+    const resposta = await requisicaoAutenticada(
+        `http://localhost:3000/usuarios/${id}`,
+        {
+            method: "PUT",
+            body: JSON.stringify({
+                nome,
+                email,
+                senha
+            })
+        }
+    );
 
-        method:"PUT",
+    if (!resposta) return;
 
-        headers:{
-            "Content-Type":"application/json"
-        },
-
-        body:JSON.stringify({
-            nome,
-            email,
-            senha
-        })
-
-    });
-
-    if(resposta.ok){
+    if (resposta.mensagem) {
 
         alert("Usuário atualizado!");
 
         carregarUsuarios();
 
-    }else{
+    } else {
 
         alert("Erro ao atualizar.");
 
     }
 
 }
+
+
+window.editarUsuario = editarUsuario;
+window.excluirUsuario = excluirUsuario;
 
 carregarUsuarios();
 

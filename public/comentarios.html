@@ -1,161 +1,533 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fórum MPB</title>
+
+    <title>Comentários - MPB Interativa</title>
+
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
 </head>
+
 <body>
 
-<div class="container">
+    <main class="comments-page">
 
-    <div class="header">
-        <div class="btn-group">
-            <a href="javascript:history.back()" class="btn-secondary">
-                <i class="fa-solid fa-arrow-left"></i> Voltar
+        <!-- CABEÇALHO -->
+        <header class="comments-header">
+
+            <a href="javascript:history.back()" class="comments-back">
+                <i class="fa-solid fa-arrow-left"></i>
+                Voltar
             </a>
-            <h1>Tópicos de Discussão</h1>
-        </div>
 
-        <button class="btn-primary" onclick="alert('Funcionalidade em desenvolvimento!')">
-            + Novo Tópico
-        </button>
-    </div>
+            <div class="comments-title-area">
+                <span class="comments-label">COMUNIDADE MPB</span>
 
-    <h2>Comentários</h2>
+                <h1>
+                    Comentários
+                    <span class="text-highlight">MPB</span>
+                </h1>
 
-    <div id="lista-comentarios"></div>
-    
-    <br></br>
+                <p id="musica-info">
+                    Compartilhe o que você achou dessa música.
+                </p>
+            </div>
 
-    <textarea id="novoComentario" placeholder="Digite seu comentário"></textarea>
+        </header>
 
-    <button class="btn-primary" onclick="enviarComentario()">
-        Enviar Comentário
-    </button>
 
-</div>
+        <!-- CONTEÚDO -->
+        <section class="comments-content">
+
+            <div class="comments-section-header">
+
+                <div>
+                    <span class="comments-label">DISCUSSÃO</span>
+
+                    <h2>
+                        O que você achou?
+                    </h2>
+                </div>
+
+                <span id="contador-comentarios" class="comments-count">
+                    0 comentários
+                </span>
+
+            </div>
+
+
+            <!-- LISTA DE COMENTÁRIOS -->
+            <div id="lista-comentarios" class="comments-list">
+
+                <div class="comments-loading">
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+                    Carregando comentários...
+                </div>
+
+            </div>
+
+
+            <!-- NOVO COMENTÁRIO -->
+            <section class="comment-form-card">
+
+                <div class="comment-form-header">
+
+                    <div class="comment-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div>
+                        <h3>Deixe seu comentário</h3>
+                        <p>Compartilhe sua opinião sobre essa música.</p>
+                    </div>
+
+                </div>
+
+
+                <textarea
+                    id="novoComentario"
+                    placeholder="Escreva seu comentário..."
+                    maxlength="500"
+                ></textarea>
+
+                <div class="comment-form-footer">
+
+                    <span id="contador-caracteres">
+                        0 / 500
+                    </span>
+
+                    <button
+                        id="btnEnviarComentario"
+                        class="btn-primary comment-submit"
+                        onclick="enviarComentario()"
+                    >
+                        <i class="fa-solid fa-paper-plane"></i>
+                        Comentar
+                    </button>
+
+                </div>
+
+            </section>
+
+        </section>
+
+    </main>
 
 
 <script>
+
 const params = new URLSearchParams(window.location.search);
 const idMusica = params.get('id');
 
-// Se não houver id da música, impede o bug e volta para a home
-if (!idMusica) {
-    alert("Nenhuma música selecionada para ver os comentários.");
-    window.location.href = 'home.html';
-}
-
 const API_URL = 'http://localhost:3000';
 
-// 1. CARREGAR COMENTÁRIOS DA MÚSICA (READ)
-async function carregarComentarios() {
+
+// ==========================================
+// VERIFICAR MÚSICA
+// ==========================================
+
+if (!idMusica) {
+
+    alert("Nenhuma música selecionada.");
+
+    window.location.href = 'home.html';
+
+}
+
+
+// ==========================================
+// CARREGAR INFORMAÇÕES DA MÚSICA
+// ==========================================
+
+async function carregarMusica() {
+
     try {
-        const res = await fetch(`${API_URL}/comentarios/${idMusica}`);
+
+        const resposta = await fetch(
+            `${API_URL}/musicas/${idMusica}`
+        );
+
+        if (!resposta.ok) {
+            throw new Error("Música não encontrada.");
+        }
+
+        const musica = await resposta.json();
+
+        const info = document.getElementById('musica-info');
+
+        info.textContent =
+            `${musica.titulo} • ${musica.artista}`;
+
+    } catch (err) {
+
+        console.error(
+            "Erro ao carregar música:",
+            err
+        );
+
+    }
+
+}
+
+
+// ==========================================
+// CARREGAR COMENTÁRIOS
+// ==========================================
+
+async function carregarComentarios() {
+
+    const lista =
+        document.getElementById('lista-comentarios');
+
+    try {
+
+        const res = await fetch(
+            `${API_URL}/comentarios/${idMusica}`
+        );
+
+        if (!res.ok) {
+            throw new Error(
+                "Erro ao buscar comentários."
+            );
+        }
+
         const comentarios = await res.json();
 
-        const lista = document.getElementById('lista-comentarios');
-        lista.innerHTML = ''; // Limpa a lista antes de renderizar para não duplicar
+        lista.innerHTML = '';
+
+        document.getElementById(
+            'contador-comentarios'
+        ).textContent =
+            `${comentarios.length} ${
+                comentarios.length === 1
+                    ? 'comentário'
+                    : 'comentários'
+            }`;
+
+
+        // Nenhum comentário
 
         if (comentarios.length === 0) {
-            lista.innerHTML = `<p class="text-gray-400">Seja o primeiro a comentar sobre essa música! 💬</p>`;
-            return;
-        }
 
-        comentarios.forEach(comentario => {
-            // Formatação simples da data vinda do banco
-            const dataFormatada = new Date(comentario.data_comentario).toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            lista.innerHTML = `
+                <div class="comments-empty">
 
-            // Se o seu backend retornar o relacionamento com o usuário, dá para mostrar o nome dele aqui
-            const nomeUsuario = comentario.usuario ? comentario.usuario.nome : "Usuário";
+                    <div class="comments-empty-icon">
+                        <i class="fa-regular fa-comment-dots"></i>
+                    </div>
 
-            lista.innerHTML += `
-                <div class="topic-card" style="margin-bottom: 12px; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.05);">
-                    <strong style="color: #4ade80; display: block; margin-bottom: 5px;">${nomeUsuario}</strong>
-                    <p style="margin: 0 0 8px 0;">${comentario.texto}</p>
-                    <small style="color: #888; font-size: 0.75rem;">${dataFormatada}</small>
+                    <h3>Ninguém comentou ainda</h3>
+
+                    <p>
+                        Seja a primeira pessoa a compartilhar
+                        sua opinião sobre essa música.
+                    </p>
+
                 </div>
             `;
+
+            return;
+
+        }
+
+
+        // Renderizar comentários
+
+        comentarios.forEach(comentario => {
+
+            const dataFormatada =
+                new Date(
+                    comentario.data_comentario
+                ).toLocaleDateString(
+                    'pt-BR',
+                    {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }
+                );
+
+
+            const nomeUsuario =
+                comentario.usuario
+                    ? comentario.usuario.nome
+                    : "Usuário";
+
+
+            lista.innerHTML += `
+
+                <article class="comment-card">
+
+                    <div class="comment-avatar">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div class="comment-body">
+
+                        <div class="comment-top">
+
+                            <strong>
+                                ${nomeUsuario}
+                            </strong>
+
+                            <span>
+                                ${dataFormatada}
+                            </span>
+
+                        </div>
+
+                        <p>
+                            ${comentario.texto}
+                        </p>
+
+                    </div>
+
+                </article>
+
+            `;
+
         });
+
+
     } catch (err) {
-        console.error("Erro ao buscar comentários:", err);
+
+        console.error(
+            "Erro ao carregar comentários:",
+            err
+        );
+
+        lista.innerHTML = `
+
+            <div class="comments-error">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                <p>
+                    Não foi possível carregar os comentários.
+                </p>
+
+            </div>
+
+        `;
+
     }
+
 }
 
-// 2. ENVIAR COMENTÁRIO (CREATE)
+
+// ==========================================
+// ENVIAR COMENTÁRIO
+// ==========================================
+
 let enviandoComentario = false;
 
-async function enviarComentario() {
-    if (enviandoComentario) return;
 
-    const campoTexto = document.getElementById('novoComentario');
-    const texto = campoTexto.value.trim();
+async function enviarComentario() {
+
+    if (enviandoComentario) {
+        return;
+    }
+
+
+    const campoTexto =
+        document.getElementById('novoComentario');
+
+    const texto =
+        campoTexto.value.trim();
+
 
     if (!texto) {
-        alert("Digite alguma coisa antes de enviar!");
+
+        alert(
+            "Digite alguma coisa antes de enviar!"
+        );
+
+        campoTexto.focus();
+
         return;
+
     }
+
 
     const usuarioRaw = localStorage.getItem('usuarioLogado');
-    let dadosLogin = null;
+    const token = localStorage.getItem('token');
+
+    let usuario = null;
 
     try {
+
         if (usuarioRaw) {
-            dadosLogin = JSON.parse(usuarioRaw);
+            usuario = JSON.parse(usuarioRaw);
         }
+
     } catch (e) {
-        console.error("Erro ao ler dados do localStorage:", e);
-    }
-    
-    // Verifica se o objeto de login e a propriedade 'usuario' existem
-    if (!dadosLogin || !dadosLogin.usuario) {
-        alert("Você precisa estar logado para comentar!");
-        window.location.href = 'login.html';
-        return;
+
+        console.error(
+            "Erro ao ler dados do usuário:",
+            e
+        );
+
     }
 
-    // Captura o ID correto de acordo com o seu console.log (dadosLogin.usuario.id)
-    const idUsuarioReal = dadosLogin.usuario.id;
+    if (!usuario || !token) {
+
+        alert("Você precisa estar logado para comentar!");
+
+        window.location.href = 'login.html';
+
+        return;
+
+    }
+
 
     try {
+
         enviandoComentario = true;
 
-        const res = await fetch(`${API_URL}/comentarios`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                texto: texto,
-                id_usuario: Number(idUsuarioReal), // Envia o ID 7 da Nathalia de forma numérica
-                id_musica: Number(idMusica)
-            })
-        });
 
-        if (res.ok) {
-            campoTexto.value = ''; // Limpa a caixa de texto
-            carregarComentarios(); // Recarrega a lista para o comentário aparecer na hora!
-        } else {
-            alert("Erro ao enviar o comentário. Tente novamente.");
+        const botao =
+            document.getElementById(
+                'btnEnviarComentario'
+            );
+
+
+        botao.disabled = true;
+
+        botao.innerHTML = `
+            <i class="fa-solid fa-spinner fa-spin"></i>
+            Enviando...
+        `;
+
+
+        const res = await fetch(
+            `${API_URL}/comentarios`,
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type':
+                        'application/json',
+
+                    'Authorization':
+                        `Bearer ${token}`
+                },
+
+                body: JSON.stringify({
+                    texto: texto,
+                    id_musica:
+                        Number(idMusica)
+                })
+            }
+        );
+
+
+        if (!res.ok) {
+
+            const erro =
+                await res.json();
+
+            throw new Error(
+                erro.erro ||
+                'Erro ao enviar comentário.'
+            );
+
         }
+
+
+        campoTexto.value = '';
+
+        atualizarContador();
+
+
+        await carregarComentarios();
+
+
     } catch (err) {
-        console.error("Erro na requisição:", err);
+
+        console.error(
+            "Erro ao enviar comentário:",
+            err
+        );
+
+        alert(
+            err.message ||
+            "Erro ao enviar comentário."
+        );
+
+
     } finally {
+
         enviandoComentario = false;
+
+
+        const botao =
+            document.getElementById(
+                'btnEnviarComentario'
+            );
+
+
+        botao.disabled = false;
+
+        botao.innerHTML = `
+            <i class="fa-solid fa-paper-plane"></i>
+            Comentar
+        `;
+
     }
+
 }
 
-// Dispara o carregamento dos comentários assim que a tela abre
-document.addEventListener('DOMContentLoaded', carregarComentarios);
+
+// ==========================================
+// CONTADOR DE CARACTERES
+// ==========================================
+
+function atualizarContador() {
+
+    const campo =
+        document.getElementById(
+            'novoComentario'
+        );
+
+    const contador =
+        document.getElementById(
+            'contador-caracteres'
+        );
+
+    contador.textContent =
+        `${campo.value.length} / 500`;
+
+}
+
+
+document
+    .getElementById('novoComentario')
+    .addEventListener(
+        'input',
+        atualizarContador
+    );
+
+
+// ==========================================
+// INICIALIZAÇÃO
+// ==========================================
+
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+
+        carregarMusica();
+
+        carregarComentarios();
+
+    }
+);
+
 </script>
 
 </body>

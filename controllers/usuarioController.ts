@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Usuario from '../models/usuarioModel'; // Alterado de require para import!
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const usuarioController = {
 
@@ -15,7 +17,19 @@ const usuarioController = {
                 });
             }
 
-            const usuario = await Usuario.criar(nome, email, senha);
+            if (senha.length < 6) {
+                return res.status(400).json({
+                    erro: 'A senha deve possuir pelo menos 6 caracteres'
+                });
+            }
+
+            const senhaHash = await bcrypt.hash(senha, 12);
+
+            const usuario = await Usuario.criar(
+                nome,
+                email,
+                senhaHash
+            );
 
             res.status(201).json({
                 id: usuario.id_usuario,
@@ -53,14 +67,31 @@ const usuarioController = {
                 });
             }
 
-            if (usuario.senha !== senha) {
+           const senhaValida = await bcrypt.compare(
+                senha,
+                usuario.senha
+            );
+
+            if (!senhaValida) {
                 return res.status(401).json({
                     erro: 'Senha incorreta'
                 });
             }
 
+            const token = jwt.sign(
+                {
+                    id: usuario.id_usuario,
+                    email: usuario.email
+                },
+                process.env.JWT_SECRET as string,
+                {
+                    expiresIn: '1h'
+                }
+            );
+
             res.json({
                 mensagem: 'Login realizado com sucesso',
+                token,
                 usuario: {
                     id: usuario.id_usuario,
                     nome: usuario.nome,

@@ -42,7 +42,7 @@ model Comentario {
   id_usuario Int
   id_musica Int
 
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade)
   musica Musica @relation(fields: [id_musica], references: [id_musica])
 }
 
@@ -50,7 +50,7 @@ model Curtida {
   id_usuario Int
   id_musica Int
 
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade)
   musica Musica @relation(fields: [id_musica], references: [id_musica])
 
   @@id([id_usuario, id_musica])

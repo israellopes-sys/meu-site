@@ -1,92 +1,457 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
-    <title>Lista de Músicas</title>
-    <link rel="stylesheet" href="css/style.css">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>MPB Interativa</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
 </head>
+
+
 <body>
 
-    <div class="container">
-        
-        <h1>Músicas <span class="text-highlight">MPB</span></h1>
-
-        <p id="usuario-logado"></p>
-
-        <div id="lista-musicas" class="music-list"></div>
-
-        <a href="usuarios.html">
-            <button class="btn-primary">Gerenciar Usuários</button>
-        </a>
-        
-        <button id="btnLogout" class="btn-secondary">
-            Sair
-        </button>
+    <main class="home-page">
 
 
-    </div>
+        <!-- CABEÇALHO -->
 
-    <script>
+        <header class="home-header">
 
-    const dadosLogin = JSON.parse(localStorage.getItem('usuarioLogado'));
+            <div class="home-brand">
 
-    // Criamos a variável 'usuario' exatamente como o resto da sua tela espera!
-    let usuario = null;
+                <span class="home-label">
+                    MPB INTERATIVA
+                </span>
 
-    if (dadosLogin) {
-        // Se o backend mandou envelopado em .usuario, a gente desencaixota:
-        if (dadosLogin.usuario) {
-            usuario = dadosLogin.usuario;
-        } else {
-            usuario = dadosLogin; // Caso contrário, usa o objeto direto
+                <h1>
+                    Músicas
+                    <span class="text-highlight">
+                        MPB
+                    </span>
+                </h1>
+
+            </div>
+
+
+            <button
+                id="btnLogout"
+                class="home-logout"
+                type="button"
+            >
+
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+
+                Sair
+
+            </button>
+
+        </header>
+
+
+        <!-- APRESENTAÇÃO -->
+
+        <section class="home-welcome">
+
+            <div>
+
+                <span class="home-section-label">
+                    SUA EXPERIÊNCIA
+                </span>
+
+                <h2 id="usuario-logado">
+                    Olá!
+                </h2>
+
+                <p>
+                    Explore músicas, conheça artistas
+                    e compartilhe o que você está ouvindo.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- MÚSICAS -->
+
+        <section class="home-music-section">
+
+            <div class="home-section-header">
+
+                <div>
+
+                    <span class="home-section-label">
+                        COLEÇÃO
+                    </span>
+
+                    <h2>
+                        Escolha uma música
+                    </h2>
+
+                </div>
+
+                <span
+                    id="contador-musicas"
+                    class="home-count"
+                >
+                    0 músicas
+                </span>
+
+            </div>
+
+
+            <div
+                id="lista-musicas"
+                class="music-grid"
+            >
+
+                <div class="home-loading">
+
+                    <i class="fa-solid fa-spinner fa-spin"></i>
+
+                    Carregando músicas...
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ADMINISTRAÇÃO -->
+
+        <section class="home-admin">
+
+            <a
+                href="usuarios.html"
+                class="home-admin-link"
+            >
+
+                <i class="fa-solid fa-users"></i>
+
+                <div>
+
+                    <strong>
+                        Gerenciar usuários
+                    </strong>
+
+                    <span>
+                        Acessar o gerenciamento da aplicação
+                    </span>
+
+                </div>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </a>
+
+        </section>
+
+
+    </main>
+
+
+<script>
+
+
+// ==========================================
+// AUTENTICAÇÃO
+// ==========================================
+
+const dadosLogin =
+    localStorage.getItem(
+        'usuarioLogado'
+    );
+
+const token =
+    localStorage.getItem(
+        'token'
+    );
+
+
+if (!dadosLogin || !token) {
+
+    window.location.href =
+        'login.html';
+
+}
+
+
+let usuario;
+
+try {
+
+    usuario =
+        JSON.parse(
+            dadosLogin
+        );
+
+} catch (erro) {
+
+    console.error(
+        'Erro ao ler usuário:',
+        erro
+    );
+
+    localStorage.removeItem(
+        'usuarioLogado'
+    );
+
+    localStorage.removeItem(
+        'token'
+    );
+
+    window.location.href =
+        'login.html';
+
+}
+
+
+// ==========================================
+// IDENTIFICAÇÃO DO USUÁRIO
+// ==========================================
+
+const elementoUsuario =
+    document.getElementById(
+        'usuario-logado'
+    );
+
+
+if (elementoUsuario && usuario) {
+
+    elementoUsuario.textContent =
+        `Olá, ${usuario.nome} 👋`;
+
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+document
+    .getElementById('btnLogout')
+    .addEventListener(
+        'click',
+        () => {
+
+            localStorage.removeItem(
+                'usuarioLogado'
+            );
+
+            localStorage.removeItem(
+                'token'
+            );
+
+            window.location.href =
+                'login.html';
+
         }
-    }
+    );
 
-    // Agora o seu código original volta a funcionar sem bugar nada:
-    if (usuario) {
-        const elementoUsuario = document.getElementById('usuario-logado');
-        if (elementoUsuario) {
-            elementoUsuario.textContent = `Olá, ${usuario.nome} 👋`;
+
+// ==========================================
+// CARREGAR MÚSICAS
+// ==========================================
+
+async function carregarMusicas() {
+
+    const lista =
+        document.getElementById(
+            'lista-musicas'
+        );
+
+
+    try {
+
+        const resposta =
+            await fetch(
+                'http://localhost:3000/musicas'
+            );
+
+
+        if (!resposta.ok) {
+
+            throw new Error(
+                'Erro ao buscar músicas.'
+            );
+
         }
-    }
-        JSON.parse(localStorage.getItem('usuarioLogado'));
 
-    if (!usuario) {
 
-        window.location.href = 'login.html';
+        const musicas =
+            await resposta.json();
 
-    }
 
-    document.getElementById('btnLogout')
-        .addEventListener('click', () => {
+        lista.innerHTML = '';
 
-            localStorage.removeItem('usuarioLogado');
 
-            window.location.href = 'login.html';
+        document
+            .getElementById(
+                'contador-musicas'
+            )
+            .textContent =
+            `${musicas.length} ${
+                musicas.length === 1
+                    ? 'música'
+                    : 'músicas'
+            }`;
 
-    });
 
-    fetch('http://localhost:3000/musicas')
-        .then(res => res.json())
-        .then(musicas => {
-            const lista = document.getElementById('lista-musicas');
+        // Nenhuma música
 
-            musicas.forEach(musica => {
-                // Modificado: Agora injeta a estrutura de cards elegantes com hover
+        if (musicas.length === 0) {
+
+            lista.innerHTML = `
+
+                <div class="home-empty">
+
+                    <div class="home-empty-icon">
+
+                        <i class="fa-solid fa-music"></i>
+
+                    </div>
+
+                    <h3>
+                        Nenhuma música encontrada
+                    </h3>
+
+                    <p>
+                        Ainda não há músicas cadastradas
+                        na coleção.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        // Renderizar músicas
+
+        musicas.forEach(
+            (musica) => {
+
+                const capa =
+                    musica.capa
+                        ? `
+                            <img
+                                src="${musica.capa}"
+                                alt="Capa de ${musica.titulo}"
+                                class="music-card-cover"
+                            >
+                        `
+                        : `
+                            <div class="music-card-placeholder">
+
+                                <i class="fa-solid fa-music"></i>
+
+                            </div>
+                        `;
+
+
                 lista.innerHTML += `
-                    <a href="musica.html?id=${musica.id_musica}" class="music-item">
-                        <div class="topic-card topic-blue">
-                            <h3>🎵 ${musica.titulo}</h3>
-                            <p class="music-artist">${musica.artista}</p>
-                        </div>
+
+                    <a
+                        href="musica.html?id=${musica.id_musica}"
+                        class="music-card-link"
+                    >
+
+                        <article class="music-card">
+
+                            <div class="music-card-cover-wrapper">
+
+                                ${capa}
+
+                                <div class="music-card-play">
+
+                                    <i class="fa-solid fa-play"></i>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="music-card-content">
+
+                                <h3>
+                                    ${musica.titulo}
+                                </h3>
+
+                                <p>
+                                    ${musica.artista}
+                                </p>
+
+                            </div>
+
+                        </article>
+
                     </a>
+
                 `;
-            });
-        })
-        .catch(err => {
-            console.error(err);
-        });
-    </script>
+
+            }
+        );
+
+
+    } catch (erro) {
+
+        console.error(
+            'Erro ao carregar músicas:',
+            erro
+        );
+
+
+        lista.innerHTML = `
+
+            <div class="home-error">
+
+                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                <p>
+                    Não foi possível carregar as músicas.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+// ==========================================
+// INICIALIZAÇÃO
+// ==========================================
+
+document.addEventListener(
+    'DOMContentLoaded',
+    carregarMusicas
+);
+
+</script>
 
 </body>
+
 </html>

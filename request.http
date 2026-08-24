@@ -1,0 +1,251 @@
+# requests.http — Testes da API MPB Interativa
+
+@baseUrl = http://localhost:3000
+
+# ================================================================
+
+# 1. CADASTRO
+
+# ================================================================
+
+### 1.1 Cadastro válido
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+"nome": "Usuario Teste API",
+"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"senha": "123456"
+}
+
+### 1.2 Campos obrigatórios vazios
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+"nome": "",
+"email": "",
+"senha": ""
+}
+
+### 1.3 Senha menor que 6 caracteres
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+"nome": "Usuario Senha Curta",
+"email": "[senha-curta-api@email.com](mailto:senha-curta-api@email.com)",
+"senha": "123"
+}
+
+### 1.4 E-mail duplicado
+
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+"nome": "Usuario Duplicado",
+"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"senha": "123456"
+}
+
+# ================================================================
+
+# 2. LOGIN
+
+# ================================================================
+
+### 2.1 Login válido
+
+# Execute este teste e copie o token retornado.
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"senha": "123456"
+}
+
+### 2.2 Login com senha incorreta
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+"email": "[teste-api@email.com](mailto:teste-api@email.com)",
+"senha": "senha-errada"
+}
+
+### 2.3 Login com usuário inexistente
+
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+"email": "[usuario-inexistente@email.com](mailto:usuario-inexistente@email.com)",
+"senha": "123456"
+}
+
+# ================================================================
+
+# 3. AUTENTICAÇÃO JWT
+
+# ================================================================
+
+#
+
+# Depois do login válido, substitua SEU_TOKEN_AQUI pelo JWT retornado.
+
+#
+
+### 3.1 Rota protegida sem token
+
+GET {{baseUrl}}/usuarios
+
+### 3.2 Rota protegida com token
+
+GET {{baseUrl}}/usuarios
+Authorization: Bearer SEU_TOKEN_AQUI
+
+# ================================================================
+
+# 4. ATUALIZAÇÃO DE USUÁRIO
+
+# ================================================================
+
+### 4.1 Atualizar usuário sem token
+
+PUT {{baseUrl}}/usuarios/ID_DO_USUARIO
+Content-Type: application/json
+
+{
+"nome": "Tentativa Sem Token",
+"email": "[sem-token@email.com](mailto:sem-token@email.com)",
+"senha": "123456"
+}
+
+### 4.2 Atualizar usuário com token
+
+PUT {{baseUrl}}/usuarios/ID_DO_USUARIO
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+
+{
+"nome": "Usuario Atualizado",
+"email": "[usuario-atualizado@email.com](mailto:usuario-atualizado@email.com)",
+"senha": "123456"
+}
+
+# ================================================================
+
+# 5. MÚSICAS
+
+# ================================================================
+
+### 5.1 Listar músicas
+
+GET {{baseUrl}}/musicas
+
+### 5.2 Buscar música por ID
+
+GET {{baseUrl}}/musicas/1
+
+# ================================================================
+
+# 6. COMENTÁRIOS
+
+# ================================================================
+
+### 6.1 Listar comentários de uma música
+
+GET {{baseUrl}}/comentarios/1
+
+### 6.2 Criar comentário sem token
+
+POST {{baseUrl}}/comentarios
+Content-Type: application/json
+
+{
+"texto": "Tentativa de comentário sem autenticação.",
+"id_musica": 1
+}
+
+### 6.3 Criar comentário com token
+
+POST {{baseUrl}}/comentarios
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+
+{
+"texto": "Comentário criado através do REST Client.",
+"id_musica": 1
+}
+
+# ================================================================
+
+# 7. EXCLUSÃO DE USUÁRIO
+
+# ================================================================
+
+#
+
+# Use um usuário de teste criado especificamente para esta etapa.
+
+# Substitua ID_DO_USUARIO pelo ID correto.
+
+#
+
+### 7.1 Excluir usuário sem token
+
+DELETE {{baseUrl}}/usuarios/ID_DO_USUARIO
+
+### 7.2 Excluir usuário com token
+
+DELETE {{baseUrl}}/usuarios/ID_DO_USUARIO
+Authorization: Bearer SEU_TOKEN_AQUI
+
+# ================================================================
+
+# 8. RESULTADOS ESPERADOS
+
+# ================================================================
+
+#
+
+# Cadastro válido                  -> 201
+
+# Campos vazios                    -> 400
+
+# Senha menor que 6                -> 400
+
+# E-mail duplicado                 -> 400
+
+# Login válido                     -> 200
+
+# Login inválido                   -> 401
+
+# GET /usuarios sem token          -> 401
+
+# GET /usuarios com token          -> 200
+
+# PUT /usuarios sem token          -> 401
+
+# PUT /usuarios com token          -> 200
+
+# POST /comentarios sem token      -> 401
+
+# POST /comentarios com token      -> 201
+
+# DELETE /usuarios sem token       -> 401
+
+# DELETE /usuarios com token       -> 200
+
+#
+
+# Nunca salve um JWT real no arquivo versionado.
+
+# ================================================================

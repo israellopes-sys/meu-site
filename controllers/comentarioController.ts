@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { AuthRequest } from '../types/auth';
 import Comentario from '../models/comentarioModel';
 
 const comentarioController = {
@@ -23,11 +24,19 @@ const comentarioController = {
 
     },
 
-    criarComentario: async (req: Request, res: Response) => {
+    criarComentario: async (req: AuthRequest, res: Response) => {
 
         try {
 
-            const { texto, id_usuario, id_musica } = req.body;
+            const { texto, id_musica } = req.body;
+
+            if (!req.usuario) {
+                return res.status(401).json({
+                    erro: 'Usuário não autenticado'
+                });
+            }
+
+            const id_usuario = req.usuario.id;
 
             const dataComentario =
                 new Date().toISOString().split('T')[0];

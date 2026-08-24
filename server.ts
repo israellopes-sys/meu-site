@@ -15,6 +15,7 @@ console.log("INICIOU");
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(express.static('public'));
 
 // Ativando as rotas sem o perigo de virem 'undefined'
 app.use(usuarioRoutes);

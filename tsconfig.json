@@ -18,11 +18,14 @@
   },
 
   "include": [
+    "server.ts",
     "controllers/**/*",
     "models/**/*",
     "routes/**/*",
+    "middleware/**/*",
+    "types/**/*",
     "public/js/**/*",
-    "prisma.ts",
+    "prisma.ts"
   ],
 
   "exclude": [
