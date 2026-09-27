@@ -1,28 +1,21 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AuthRequest } from '../types/auth';
 import Usuario from '../models/usuarioModel';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import SendMail from '../services/SendMail';
 
 const usuarioController = {
 
-   cadastro: async (req: Request, res: Response) => {
+    cadastro: async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
 
         try {
 
             const { nome, email, senha } = req.body;
-
-            if (!nome || !email || !senha) {
-                return res.status(400).json({
-                    erro: 'Preencha todos os campos'
-                });
-            }
-
-            if (senha.length < 6) {
-                return res.status(400).json({
-                    erro: 'A senha deve possuir pelo menos 6 caracteres'
-                });
-            }
 
             const senhaHash = await bcrypt.hash(senha, 12);
 
@@ -32,23 +25,33 @@ const usuarioController = {
                 senhaHash
             );
 
+            try {
+                await SendMail.enviar(
+                    email,
+                    'Cadastro realizado - MPB Interativa',
+                    `Olá, ${nome}! Seu cadastro foi realizado com sucesso.`,
+                    `
+                        <h1>Cadastro realizado com sucesso!</h1>
+                        <p>Olá, ${nome}!</p>
+                        <p>Seu cadastro no MPB Interativa foi realizado com sucesso.</p>
+                    `
+                );
+            } catch (emailError) {
+                console.error(
+                    'Erro ao enviar e-mail de cadastro:',
+                    emailError
+                );
+            }
+
             res.status(201).json({
                 id: usuario.id_usuario,
                 nome: usuario.nome,
                 email: usuario.email
             });
 
-        } catch (err: any) {
+        } catch (err) {
 
-            if (err.code === 'P2002') {
-                return res.status(400).json({
-                    erro: 'Email já cadastrado'
-                });
-            }
-
-            return res.status(500).json({
-                erro: 'Erro ao cadastrar usuário'
-            });
+            return next(err);
 
         }
 
@@ -68,7 +71,7 @@ const usuarioController = {
                 });
             }
 
-           const senhaValida = await bcrypt.compare(
+            const senhaValida = await bcrypt.compare(
                 senha,
                 usuario.senha
             );
@@ -110,7 +113,6 @@ const usuarioController = {
 
     },
 
-
     perfil: async (
         req: AuthRequest,
         res: Response
@@ -118,16 +120,13 @@ const usuarioController = {
 
         try {
 
-            const id =
-                req.usuario!.id;
-
+            const id = req.usuario!.id;
 
             const [usuario, totalComentarios] =
                 await Promise.all([
                     Usuario.buscarPorId(id),
                     Usuario.contarComentarios(id)
                 ]);
-
 
             if (!usuario) {
 
@@ -136,7 +135,6 @@ const usuarioController = {
                 });
 
             }
-
 
             return res.json({
                 id: usuario.id_usuario,
@@ -157,6 +155,7 @@ const usuarioController = {
             });
 
         }
+
     },
 
     atualizarPerfil: async (
@@ -166,15 +165,13 @@ const usuarioController = {
 
         try {
 
-            const id =
-                req.usuario!.id;
+            const id = req.usuario!.id;
 
             const {
                 nome,
                 email,
                 senha
             } = req.body;
-
 
             if (!nome || !email) {
 
@@ -183,7 +180,6 @@ const usuarioController = {
                 });
 
             }
-
 
             if (
                 senha &&
@@ -196,7 +192,6 @@ const usuarioController = {
 
             }
 
-
             const senhaHash =
                 senha
                     ? await bcrypt.hash(
@@ -205,14 +200,12 @@ const usuarioController = {
                     )
                     : undefined;
 
-
             await Usuario.atualizar(
                 id,
                 nome,
                 email,
                 senhaHash
             );
-
 
             return res.json({
                 mensagem: 'Perfil atualizado com sucesso'
@@ -225,7 +218,6 @@ const usuarioController = {
                 err
             );
 
-
             if (err.code === 'P2002') {
 
                 return res.status(400).json({
@@ -233,7 +225,6 @@ const usuarioController = {
                 });
 
             }
-
 
             return res.status(500).json({
                 erro: 'Erro ao atualizar perfil'
@@ -268,7 +259,12 @@ const usuarioController = {
             const id = Number(req.params.id);
             const { nome, email, senha } = req.body;
 
-            await Usuario.atualizar(id, nome, email, senha);
+            await Usuario.atualizar(
+                id,
+                nome,
+                email,
+                senha
+            );
 
             res.json({
                 mensagem: 'Usuário atualizado com sucesso'
@@ -304,10 +300,8 @@ const usuarioController = {
 
         }
 
-    },
+    }
+
 };
-
-
-
 
 export default usuarioController;

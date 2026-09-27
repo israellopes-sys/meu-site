@@ -1,6 +1,9 @@
+import 'dotenv/config';
+
 import express, { Express } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import errorMiddleware from './middleware/errorMiddleware';
 
 // Importações modernas das rotas que acabamos de corrigir!
 import usuarioRoutes from './routes/usuarioRoutes';
@@ -29,6 +32,8 @@ app.use(curtidaRoutes);
 app.use((req, res, next) => {
     res.status(404).json({ erro: 'Rota não encontrada' });
 });
+
+app.use(errorMiddleware);
 
 app.listen(3000, () => {
     console.log('Servidor rodando na porta 3000 🚀');

@@ -1,8 +1,16 @@
 import prisma from '../prisma';
 
 const Musica = {
-    listar: async () => {
-        return await prisma.musica.findMany();
+    listar: async (nome?: string) => {
+        return await prisma.musica.findMany({
+            where: nome
+                ? {
+                    titulo: {
+                        contains: nome
+                    }
+                }
+                : undefined
+        });
     },
 
     buscarPorId: async (id: number) => {

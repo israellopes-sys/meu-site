@@ -13,6 +13,8 @@
 
     "resolveJsonModule": true,
 
+    "types": ["node"],
+
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
@@ -23,6 +25,7 @@
     "models/**/*",
     "routes/**/*",
     "middleware/**/*",
+    "services/**/*",
     "types/**/*",
     "public/js/**/*",
     "prisma.ts"

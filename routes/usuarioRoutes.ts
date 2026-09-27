@@ -1,4 +1,7 @@
 import express from 'express';
+import validate from '../middleware/validate';
+import { cadastroSchema, idSchema } from '../schemas/usuarioSchema';
+
 
 import usuarioController from '../controllers/usuarioController';
 
@@ -8,6 +11,9 @@ const router = express.Router();
 
 router.post(
     '/usuarios',
+    validate({
+        body: cadastroSchema
+    }),
     usuarioController.cadastro
 );
 
@@ -37,12 +43,14 @@ router.put(
 router.put(
     '/usuarios/:id',
     authMiddleware,
+    validate({ params: idSchema }),
     usuarioController.atualizarUsuario
 );
 
 router.delete(
     '/usuarios/:id',
     authMiddleware,
+    validate({ params: idSchema }),
     usuarioController.removerUsuario
 );
 

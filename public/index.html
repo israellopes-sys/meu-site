@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet">
 </head>
 
 <body class="bg-black text-white">
@@ -17,32 +20,43 @@
     <!-- FORMULÁRIO -->
     <div class="flex justify-center items-center min-h-screen">
         <div class="w-full max-w-md bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700">
+
             <h1 class="text-3xl font-extrabold text-center mb-6">
                 Crie Sua Conta <span class="text-blue-500">MPB</span>
             </h1>
 
-
             <form id="formCadastro">
+
+                <!-- Nome -->
                 <div class="mb-4">
-                     <label>Nome Completo</label>
-                     <input
+                    <label for="nome">Nome Completo</label>
+
+                    <input
                         id="nome"
                         type="text"
                         required
+                        minlength="2"
                         class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
-                 </div>
 
-                 <div class="mb-6">
-                      <label>Email</label>
-                     <input
+                    <p id="erroNome" class="text-red-400 text-sm mt-1"></p>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="email">Email</label>
+
+                    <input
                         id="email"
                         type="email"
                         required
                         class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
+
+                    <p id="erroEmail" class="text-red-400 text-sm mt-1"></p>
                 </div>
 
-                 <div class="mb-6">
-                    <label>Senha</label>
+                <!-- Senha -->
+                <div class="mb-6">
+                    <label for="senha">Senha</label>
 
                     <input
                         id="senha"
@@ -51,91 +65,151 @@
                         required
                         class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
 
+                    <p id="erroSenha" class="text-red-400 text-sm mt-1"></p>
+
                     <div class="mt-2">
                         <input type="checkbox" id="mostrarSenha">
                         <label for="mostrarSenha">Mostrar senha</label>
                     </div>
                 </div>
 
-                 <button type="submit"
-                     class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg">
-                      Cadastrar
-                  </button>
+                <!-- Confirmar senha -->
+                <div class="mb-6">
+                    <label for="confirmarSenha">Confirmar senha</label>
+
+                    <input
+                        id="confirmarSenha"
+                        type="password"
+                        required
+                        class="w-full p-3 rounded-lg bg-gray-900 text-white border border-gray-700">
+
+                    <p id="erroConfirmarSenha" class="text-red-400 text-sm mt-1"></p>
+                </div>
+
+                <!-- Botão -->
+                <button
+                    type="submit"
+                    class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg">
+                    Cadastrar
+                </button>
 
             </form>
 
             <p class="text-center text-gray-400 mt-4 text-sm">
-                Já tem conta? <a href="login.html" class="text-blue-500">Faça Login</a>
+                Já tem conta?
+                <a href="login.html" class="text-blue-500">
+                    Faça Login
+                </a>
             </p>
+
         </div>
     </div>
 
-
-   
-
-    <!-- SCRIPT -->
     <script>
-    const campoSenha = document.getElementById('senha');
-    const checkbox = document.getElementById('mostrarSenha');
+        const form = document.getElementById('formCadastro');
+        const campoSenha = document.getElementById('senha');
+        const confirmarSenha = document.getElementById('confirmarSenha');
+        const checkbox = document.getElementById('mostrarSenha');
 
-    // Mostrar/Esconder Senha
-    checkbox.addEventListener('change', () => {
-        campoSenha.type = checkbox.checked ? 'text' : 'password';
-    });
+        let enviando = false;
 
-    const form = document.getElementById('formCadastro');
-    let enviando = false; // Trava de segurança contra cliques duplos
+        // Mostrar / esconder senha
+        checkbox.addEventListener('change', () => {
+            campoSenha.type = checkbox.checked ? 'text' : 'password';
+        });
 
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault(); // Impede o navegador de recarregar a página
+        // Cadastro
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-            if (enviando) return; // Se já enviou uma requisição, ignora o clique fantasma
-
-            const nome = document.getElementById('nome').value;
-            const email = document.getElementById('email').value;
-            const senha = document.getElementById('senha').value;
-
-            if (senha.length < 6) {
-                alert('A senha deve possuir pelo menos 6 caracteres.');
+            if (enviando) {
                 return;
             }
 
-            enviando = true; // Ativa a trava
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const senha = campoSenha.value;
 
-            fetch('http://localhost:3000/usuarios', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ nome, email, senha })
-            })
-            .then(res => {
-                // Se não for sucesso (ex: e-mail duplicado), extrai o erro do backend
-                if (!res.ok) {
-                    return res.json().then(errData => { throw errData; });
+            // Validação da confirmação de senha
+            if (senha !== confirmarSenha.value) {
+                confirmarSenha.setCustomValidity('As senhas não coincidem.');
+            } else {
+                confirmarSenha.setCustomValidity('');
+            }
+
+            // Validação nativa do navegador
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            enviando = true;
+
+            // Limpa mensagens anteriores
+            document.getElementById('erroNome').textContent = '';
+            document.getElementById('erroEmail').textContent = '';
+            document.getElementById('erroSenha').textContent = '';
+            document.getElementById('erroConfirmarSenha').textContent = '';
+
+            try {
+                const resposta = await fetch('/usuarios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nome,
+                        email,
+                        senha
+                    })
+                });
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw dados;
                 }
-                return res.json();
-            })
-            .then(data => {
+
                 alert('Conta criada com sucesso! Faça seu login. 🎉');
-                window.location.href = 'login.html'; 
-            })
-            .catch(err => {
-                console.error('Erro na requisição:', err);
-                // Se o backend mandou a mensagem bonitinha, exibe ela ("Email já cadastrado")
-                if (err && err.erro) {
-                    alert(err.erro);
+
+                window.location.href = '/login.html';
+
+            } catch (erro) {
+                console.error('Erro na requisição:', erro);
+
+                if (erro && erro.detalhes) {
+
+                    erro.detalhes.forEach((item) => {
+
+                        if (item.campo === 'nome') {
+                            document.getElementById('erroNome').textContent =
+                                item.mensagem;
+                        }
+
+                        if (item.campo === 'email') {
+                            document.getElementById('erroEmail').textContent =
+                                item.mensagem;
+                        }
+
+                        if (item.campo === 'senha') {
+                            document.getElementById('erroSenha').textContent =
+                                item.mensagem;
+                        }
+                    });
+
+                } else if (erro && erro.erro) {
+                    alert(erro.erro);
+
                 } else {
                     alert('Não foi possível conectar ao servidor.');
                 }
-            })
-            .finally(() => {
-                enviando = false; // Libera a trava para o usuário poder tentar de novo caso erre
-            });
+
+            } finally {
+                enviando = false;
+            }
         });
-    }
     </script>
 
 </body>
+
 </html>

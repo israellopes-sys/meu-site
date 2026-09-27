@@ -4,7 +4,7 @@ import Musica from '../models/musicaModel'; // Mudamos para a sintaxe moderna (i
 const musicaController = {
     listarMusicas: async (req: Request, res: Response) => {
         try {
-            const musicas = await Musica.listar();
+            const musicas = await Musica.listar(req.query.nome as string | undefined);
             res.json(musicas);
         } catch (err) {
             res.status(500).json({

@@ -1,6 +1,6 @@
 # MPB Interativa
 
-Sistema web desenvolvido para a disciplina de Banco de Dados II, com foco em gerenciamento de usuários, autenticação, músicas e comentários.
+Sistema web desenvolvido para a disciplina de Banco de Dados II, utilizando Node.js, Express e TypeScript. A aplicação possui cadastro e autenticação de usuários, catálogo de músicas, comentários e integração com banco de dados.
 
 ## Tecnologias
 
@@ -9,103 +9,128 @@ Sistema web desenvolvido para a disciplina de Banco de Dados II, com foco em ger
 * TypeScript
 * Prisma ORM
 * SQLite
+* Zod
+* Nodemailer
 * JWT
 * bcrypt
-* HTML
-* CSS
-* JavaScript
-* REST Client
+* HTML, CSS e JavaScript
 
 ## Arquitetura
 
-O backend utiliza uma organização baseada em MVC:
+O back-end segue uma organização baseada em MVC:
 
 ```text
-controllers/
-models/
-routes/
-middleware/
-types/
-public/
-prisma/
+controllers/  → regras das requisições
+models/       → acesso ao banco via Prisma
+routes/       → definição das rotas
+middleware/   → autenticação, validação e tratamento de erros
+services/     → serviços externos, como envio de e-mail
+types/        → tipagens TypeScript
+public/       → front-end
+prisma/       → schema, migrations e seed
 ```
-
-### Principais componentes
-
-* **Controllers:** regras das requisições e respostas da API.
-* **Models:** acesso aos dados utilizando Prisma.
-* **Routes:** definição dos endpoints.
-* **Middleware:** autenticação e validação do JWT.
-* **Public:** interface web da aplicação.
-* **Prisma:** schema, migrations e seed do banco.
 
 ## Funcionalidades
 
-### Usuários
+* Cadastro e login de usuários.
+* Autenticação utilizando JWT.
+* Senhas protegidas com bcrypt.
+* CRUD de usuários.
+* Catálogo e consulta de músicas.
+* Comentários autenticados.
+* Player de áudio.
+* Validação de dados no back-end e front-end.
+* Envio de e-mail após cadastro.
 
-* Cadastro de usuário.
-* Login.
-* Listagem de usuários.
-* Atualização de usuário.
-* Exclusão de usuário.
-* Validação de senha mínima.
-* Validação de e-mail duplicado.
+## Validação de dados
 
-### Autenticação
+A API utiliza **Zod** para validar os dados antes que eles cheguem aos Controllers ou ao banco de dados.
 
-A autenticação utiliza JWT.
+São validados:
 
-Após o login, a API retorna um token que é armazenado no navegador.
+* Corpo das requisições.
+* Parâmetros de rota.
+* Parâmetros de consulta.
+* E-mail.
+* Tamanho mínimo de nome e senha.
+* IDs numéricos positivos.
 
-As rotas protegidas exigem o header:
+As validações utilizam um middleware genérico:
 
-```http
-Authorization: Bearer SEU_TOKEN
+```ts
+validate({ body: cadastroSchema })
+validate({ params: idSchema })
+validate({ query: musicaQuerySchema })
 ```
 
-O middleware valida o token e disponibiliza os dados do usuário autenticado em:
+Isso evita repetir regras de validação dentro dos Controllers.
+
+### Tratamento de erros
+
+Os erros são tratados por um middleware centralizado.
+
+* **400** — dados enviados são inválidos.
+* **404** — recurso solicitado não existe.
+* **409** — conflito, como e-mail já cadastrado.
+
+As respostas de validação informam o campo e a mensagem do erro.
+
+Exemplo:
+
+```json
+{
+    "erro": "Dados inválidos",
+    "detalhes": [
+        {
+            "campo": "email",
+            "mensagem": "Informe um e-mail válido"
+        }
+    ]
+}
+```
+
+## Envio de e-mail
+
+O projeto utiliza **Nodemailer** para envio de e-mails através de SMTP.
+
+As configurações são armazenadas em variáveis de ambiente:
+
+```env
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
+```
+
+O serviço está isolado em:
 
 ```text
-req.usuario
+services/SendMail.ts
 ```
 
-### Segurança
+Após um cadastro realizado com sucesso, o sistema envia um e-mail de confirmação contendo versões em texto e HTML.
 
-As senhas são armazenadas utilizando `bcrypt`.
+Durante o desenvolvimento, quando não há credenciais SMTP configuradas, é utilizada uma conta de teste do **Ethereal**, que fornece uma URL para visualizar o e-mail enviado.
 
-A chave utilizada para assinar os tokens JWT é armazenada na variável de ambiente `JWT_SECRET`.
+Caso o envio falhe, o cadastro não é cancelado: o usuário continua sendo criado e o erro é registrado no servidor.
 
-### Músicas
+## Front-end
 
-* Listagem de músicas.
-* Consulta de uma música por ID.
-* Página individual da música.
-* Player de áudio no front-end.
+O formulário de cadastro utiliza validação nativa do navegador:
 
-### Comentários
+* `required`;
+* `minlength`;
+* `type="email"`.
 
-* Listagem de comentários por música.
-* Criação de comentários por usuários autenticados.
-* O usuário autor do comentário é identificado através do JWT.
-* O `id_usuario` não é confiado ao cliente.
+A confirmação de senha utiliza `setCustomValidity()` para impedir o envio quando as senhas são diferentes.
 
-### Front-end
+Os erros retornados pela API são exibidos próximos aos campos correspondentes.
 
-A aplicação possui:
+A validação do front-end melhora a experiência do usuário, mas a proteção dos dados é feita no back-end através do Zod.
 
-* Página de cadastro.
-* Página de login.
-* Home com catálogo de músicas.
-* Player individual.
-* Página de comentários.
-* Gerenciamento de usuários.
-* Logout.
-* Redirecionamento para login quando não existe autenticação válida.
-* Layout responsivo.
+## Banco de dados
 
-## Banco de Dados
-
-O projeto utiliza SQLite através do Prisma.
+O projeto utiliza **SQLite** através do Prisma.
 
 Principais entidades:
 
@@ -117,199 +142,103 @@ Curtida
 Topico
 ```
 
-Os modelos possuem relacionamentos entre usuários, músicas, comentários e curtidas.
+As senhas não são armazenadas em texto puro e os registros possuem relacionamentos definidos no Prisma.
 
-A exclusão de um usuário utiliza exclusão em cascata para seus registros relacionados.
-
-## Configuração do ambiente
+## Configuração
 
 Crie um arquivo `.env` na raiz do projeto:
 
 ```env
 DATABASE_URL="file:../database.db"
 JWT_SECRET="SUA_CHAVE_SECRETA"
+
+SMTP_HOST=
+SMTP_PORT=
+SMTP_USER=
+SMTP_PASS=
 ```
 
-### Importante
-
-O arquivo `.env` não deve ser enviado ao repositório.
-
-O banco local também não deve ser versionado.
-
-Esses arquivos já estão configurados no `.gitignore`.
+O `.env` não deve ser enviado ao repositório. O arquivo `.env.example` contém apenas as variáveis necessárias, sem credenciais.
 
 ## Instalação
 
-Clone o projeto e entre na pasta:
-
-```bash
-git clone URL_DO_REPOSITORIO
-cd meu-site-main
-```
-
-Instale as dependências:
-
 ```bash
 npm install
-```
-
-## Prisma
-
-Depois de instalar as dependências, gere o Prisma Client:
-
-```bash
 npx prisma generate
-```
-
-Para aplicar as migrations:
-
-```bash
 npm run migrate
-```
-
-Para popular o banco com dados de teste:
-
-```bash
 npm run seed
 ```
 
-O seed pode ser executado novamente para recriar os dados iniciais.
+## Execução
 
-## Executando em desenvolvimento
-
-Use:
+Modo de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-O servidor será executado na porta:
-
-```text
-3000
-```
-
-A aplicação pode ser acessada em:
-
-```text
-http://localhost:3000
-```
-
-## Build
-
-Para compilar o projeto TypeScript:
+Build:
 
 ```bash
 npm run build
 ```
 
-Os arquivos compilados são gerados na pasta:
-
-```text
-dist/
-```
-
-## Executando a versão compilada
-
-Depois do build:
+Executar a versão compilada:
 
 ```bash
 npm start
 ```
 
-O servidor será iniciado a partir de:
+A aplicação fica disponível em:
 
 ```text
-dist/server.js
+http://localhost:3000
 ```
 
-## Testes da API
+## Testes
 
-O projeto possui o arquivo:
+O arquivo `requests.http` contém testes para:
 
-```text
-requests.http
-```
-
-Ele contém testes para:
-
-* cadastro de usuário;
-* validação de campos;
-* senha menor que 6 caracteres;
+* cadastro válido;
+* cadastro inválido;
+* parâmetros de rota inválidos;
+* parâmetros de consulta inválidos;
+* recurso inexistente;
 * e-mail duplicado;
-* login válido;
-* login inválido;
-* acesso a rota protegida sem token;
-* acesso a rota protegida com token;
-* atualização autenticada;
-* exclusão autenticada;
-* criação de comentário autenticada;
-* consulta de músicas;
-* consulta de comentários.
+* envio de e-mail;
+* rotas autenticadas.
 
-Para testar rotas protegidas, primeiro faça login e copie o JWT retornado pela API.
+Os testes principais de validação retornam:
 
-## Principais endpoints
-
-### Usuários
-
-```http
-POST /usuarios
-GET /usuarios
-PUT /usuarios/:id
-DELETE /usuarios/:id
+```text
+201 → cadastro válido
+400 → dados inválidos
+404 → recurso inexistente
+409 → e-mail já cadastrado
 ```
 
-### Autenticação
+## Segurança
 
-```http
-POST /login
-```
-
-### Músicas
-
-```http
-GET /musicas
-GET /musicas/:id
-```
-
-### Comentários
-
-```http
-GET /comentarios/:id
-POST /comentarios
-```
-
-As operações de gerenciamento de usuários e criação de comentários exigem autenticação.
+* Senhas protegidas com bcrypt.
+* Autenticação utilizando JWT.
+* `JWT_SECRET` armazenado em variável de ambiente.
+* Credenciais SMTP fora do código-fonte.
+* Rotas protegidas por middleware de autenticação.
 
 ## Estrutura resumida
 
 ```text
 meu-site-main/
-│
 ├── controllers/
 ├── models/
 ├── middleware/
 ├── routes/
+├── services/
+├── schemas/
 ├── types/
-│
 ├── prisma/
-│   ├── migrations/
-│   ├── schema.prisma
-│   └── seed.js
-│
 ├── public/
-│   ├── css/
-│   ├── js/
-│   ├── audio/
-│   ├── index.html
-│   ├── login.html
-│   ├── home.html
-│   ├── musica.html
-│   ├── comentarios.html
-│   └── usuarios.html
-│
-├── .env
+├── .env.example
 ├── .gitignore
 ├── package.json
 ├── requests.http
@@ -318,20 +247,19 @@ meu-site-main/
 └── tsconfig.json
 ```
 
-## Status do projeto
+## Status
 
 O projeto possui atualmente:
 
-* autenticação com JWT;
-* senhas protegidas com bcrypt;
-* rotas protegidas;
-* CRUD de usuários;
-* operações com Prisma;
-* migrations;
-* seed;
-* catálogo de músicas;
-* player;
-* comentários;
-* interface responsiva;
-* build em TypeScript;
-* execução em modo de desenvolvimento e produção.
+* arquitetura MVC;
+* TypeScript;
+* Prisma e SQLite;
+* autenticação JWT;
+* bcrypt;
+* validação com Zod;
+* middleware genérico de validação;
+* tratamento centralizado de erros;
+* envio de e-mail com Nodemailer;
+* integração com SMTP/Ethereal;
+* validação e feedback no front-end;
+* testes das principais situações da API.
